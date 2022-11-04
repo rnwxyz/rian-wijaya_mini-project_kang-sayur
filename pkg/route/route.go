@@ -15,7 +15,7 @@ import (
 )
 
 func InitRoute(e *echo.Echo, db *gorm.DB) {
-	e.Use(middleware.Recover())
+	// e.Use(middleware.Recover())
 	e.Validator = &utils.CustomValidator{
 		Validator: validator.New(),
 	}

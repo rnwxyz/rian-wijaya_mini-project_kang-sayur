@@ -18,6 +18,6 @@ func main() {
 		panic(err)
 	}
 	e := echo.New()
-	route.InitRoute(e, db)
+	route.InitGlobalRoute(e, db)
 	e.Logger.Fatal(e.Start(":" + config.Cfg.API_PORT))
 }

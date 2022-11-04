@@ -5,26 +5,37 @@ import (
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/model"
 )
 
-type UserRequest struct {
-	Name       string `json:"name"`
-	Email      string `json:"email"`
-	Phone      string `json:"phone"`
-	Password   string `json:"password"`
-	ProvinceID uint   `json:"province_id"`
-	RegencyID  uint   `json:"regency_id"`
-	DistrictID uint   `json:"district_id"`
-	VillageID  uint   `json:"village_id"`
+type UserSignup struct {
+	Name     string `json:"name"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
-func (u *UserRequest) ToModel() *model.User {
+func (u *UserSignup) ToModel() *model.User {
+	return &model.User{
+		Name:  u.Name,
+		Email: u.Email,
+	}
+}
+
+type UserUpdate struct {
+	ID         uuid.UUID `json:"id"`
+	Name       string    `json:"name"`
+	Phone      string    `json:"phone"`
+	ProvinceID uint      `json:"province_id"`
+	RegencyID  uint      `json:"regency_id"`
+	DistrictID uint      `json:"district_id"`
+	VillageID  uint      `json:"village_id"`
+}
+
+func (u *UserUpdate) ToModel() *model.User {
 	return &model.User{
 		Name:       u.Name,
-		Email:      u.Email,
 		Phone:      u.Phone,
-		ProvinceID: u.ProvinceID,
-		RegencyID:  u.RegencyID,
-		DistrictID: u.DistrictID,
-		VillageID:  u.VillageID,
+		ProvinceID: &u.ProvinceID,
+		RegencyID:  &u.RegencyID,
+		DistrictID: &u.DistrictID,
+		VillageID:  &u.VillageID,
 	}
 }
 
@@ -36,7 +47,7 @@ type UserResponse struct {
 	ProvinceName string    `json:"province_name"`
 	RegencyName  string    `json:"regency_name"`
 	DistrictName string    `json:"district_name"`
-	VillageName  string    `json:"village_id"`
+	VillageName  string    `json:"village_name"`
 }
 
 func (u *UserResponse) FromModel(model *model.User) {
@@ -52,7 +63,7 @@ func (u *UserResponse) FromModel(model *model.User) {
 
 type UsersResponse []UserResponse
 
-func (u *UsersResponse) FromModel(model model.Users) {
+func (u *UsersResponse) FromModel(model []model.User) {
 	for _, each := range model {
 		var user UserResponse
 		user.FromModel(&each)

@@ -9,20 +9,20 @@ type Province struct {
 type Regency struct {
 	ID         uint `gorm:"primaryKey"`
 	ProvinceID uint
-	Province   Province `gorm:"constraint:OnUpdate:CASCADE,OnDelete:RESTRICT;"`
+	Province   Province
 	Name       string
 }
 
 type District struct {
 	ID        uint `gorm:"primaryKey"`
 	RegencyID uint
-	Regency   Regency `gorm:"constraint:OnUpdate:CASCADE,OnDelete:RESTRICT;"`
+	Regency   Regency
 	Name      string
 }
 
 type Village struct {
 	ID         uint `gorm:"primaryKey"`
 	DistrictID uint
-	District   District `gorm:"constraint:OnUpdate:CASCADE,OnDelete:RESTRICT;"`
+	District   District
 	Name       string
 }

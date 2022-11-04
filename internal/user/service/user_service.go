@@ -8,7 +8,9 @@ import (
 )
 
 type UserService interface {
-	CreateUser(user dto.UserRequest, ctx context.Context) (uuid.UUID, error)
-	UpdateUser(id string, user dto.UserRequest, ctx context.Context) error
+	CreateAdmin() error
+	CreateUser(user dto.UserSignup, ctx context.Context) (uuid.UUID, error)
+	UpdateUser(id string, user dto.UserUpdate, ctx context.Context) error
 	FindAllUsers(ctx context.Context) (dto.UsersResponse, error)
+	DeleteUser(id string, ctx context.Context) error
 }

@@ -13,16 +13,26 @@ type User struct {
 	UpdatedAt  time.Time
 	DeletedAt  gorm.DeletedAt `gorm:"index"`
 	Name       string         `gorm:"not null"`
-	Email      string         `gorm:"not null;uniqueIndex"`
+	Email      string         `gorm:"not null;unique"`
 	Phone      string
 	Password   string `gorm:"not null"`
 	RoleID     uint
-	ProvinceID uint
-	Province   Province `gorm:"constraint:OnUpdate:CASCADE,OnDelete:RESTRICT;"`
-	RegencyID  uint
-	Regency    Regency `gorm:"constraint:OnUpdate:CASCADE,OnDelete:RESTRICT;"`
-	DistrictID uint
-	District   District `gorm:"constraint:OnUpdate:CASCADE,OnDelete:RESTRICT;"`
-	VillageID  uint
-	Village    Village `gorm:"constraint:OnUpdate:CASCADE,OnDelete:RESTRICT;"`
+	Role       Role
+	ProvinceID *uint
+	Province   Province
+	RegencyID  *uint
+	Regency    Regency
+	DistrictID *uint
+	District   District
+	VillageID  *uint
+	Village    Village
+}
+
+type Role struct {
+	ID          uint `gorm:"primaryKey"`
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+	DeletedAt   gorm.DeletedAt `gorm:"index"`
+	Name        string
+	Description string
 }

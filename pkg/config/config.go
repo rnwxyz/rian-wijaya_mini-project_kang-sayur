@@ -14,6 +14,7 @@ type Config struct {
 	DB_NAME                string
 	DEFAULT_ADMIN_EMAIL    string
 	DEFAULT_ADMIN_PASSWORD string
+	JWT_SECRET             string
 }
 
 var Cfg *Config

@@ -9,4 +9,6 @@ var (
 	ErrInvalidId                    = errors.New("invalid id")
 	ErrNotAllowedDeleteDefaultAdmin = errors.New("default admin user not allowed to delete")
 	ErrFailedDeleteUser             = errors.New("failed delete user")
+	ErrInvalidPassword              = errors.New("invalid password")
+	ErrPermission                   = errors.New("not have permission to access")
 )

@@ -15,19 +15,6 @@ type userRepositoryImpl struct {
 	db *gorm.DB
 }
 
-// FindUserByEmail implements UserRepository
-func (u *userRepositoryImpl) FindUserByEmail(Email string, ctx context.Context) (*model.User, error) {
-	var user model.User
-	err := u.db.WithContext(ctx).Select([]string{"id", "name", "email", "phone", "password", "province", "regency", "district", "village"}).Where("email = ?", Email).First(&user).Error
-	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return nil, utils.ErrUserNotFound
-		}
-		return nil, err
-	}
-	return &user, nil
-}
-
 // CreateUser implements UserRepository
 func (u *userRepositoryImpl) CreateUser(user *model.User, ctx context.Context) error {
 	err := u.db.WithContext(ctx).Create(user).Error
@@ -40,26 +27,30 @@ func (u *userRepositoryImpl) CreateUser(user *model.User, ctx context.Context) e
 	return nil
 }
 
-// DeleteUser implements UserRepository
-func (u *userRepositoryImpl) DeleteUser(user *model.User, ctx context.Context) error {
-	err := u.db.WithContext(ctx).First(user).Error
+// FindUserByEmail implements UserRepository
+func (u *userRepositoryImpl) FindUserByEmail(email string, ctx context.Context) (*model.User, error) {
+	var user model.User
+	err := u.db.WithContext(ctx).Select([]string{"id", "email", "password", "role_id"}).Where("email = ?", email).First(&user).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return utils.ErrUserNotFound
+			return nil, utils.ErrUserNotFound
 		}
-		return err
+		return nil, err
 	}
-	if user.Email == config.Cfg.DEFAULT_ADMIN_EMAIL {
-		return utils.ErrNotAllowedDeleteDefaultAdmin
+	return &user, nil
+}
+
+// FindUserByID implements UserRepository
+func (u *userRepositoryImpl) FindUserByID(id string, ctx context.Context) (*model.User, error) {
+	var user model.User
+	err := u.db.WithContext(ctx).Preload("Province").Preload("Regency").Preload("District").Preload("Village").Where("id = ?", id).First(&user).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, utils.ErrUserNotFound
+		}
+		return nil, err
 	}
-	res := u.db.WithContext(ctx).Delete(user)
-	if res.Error != nil {
-		return res.Error
-	}
-	if res.RowsAffected == 0 {
-		return utils.ErrFailedDeleteUser
-	}
-	return nil
+	return &user, nil
 }
 
 // FindAllUsers implements UserRepository
@@ -85,6 +76,28 @@ func (u *userRepositoryImpl) UpdateUser(user *model.User, ctx context.Context) e
 	}
 	if res.RowsAffected == 0 {
 		return utils.ErrUserNotFound
+	}
+	return nil
+}
+
+// DeleteUser implements UserRepository
+func (u *userRepositoryImpl) DeleteUser(user *model.User, ctx context.Context) error {
+	err := u.db.WithContext(ctx).First(user).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return utils.ErrUserNotFound
+		}
+		return err
+	}
+	if user.Email == config.Cfg.DEFAULT_ADMIN_EMAIL {
+		return utils.ErrNotAllowedDeleteDefaultAdmin
+	}
+	res := u.db.WithContext(ctx).Delete(user)
+	if res.Error != nil {
+		return res.Error
+	}
+	if res.RowsAffected == 0 {
+		return utils.ErrFailedDeleteUser
 	}
 	return nil
 }

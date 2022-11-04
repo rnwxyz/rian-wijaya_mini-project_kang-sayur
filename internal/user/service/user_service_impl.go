@@ -11,13 +11,40 @@ import (
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils"
 )
 
-type userServiceImpl struct {
-	repo     repository.UserRepository
-	password utils.Password
+type (
+	PasswordHashFunction interface {
+		HashPassword(password string) (string, error)
+		CheckPasswordHash(password, hash string) bool
+	}
+
+	JWTService interface {
+		GenerateToken(user *model.User) (string, error)
+	}
+	userServiceImpl struct {
+		repo       repository.UserRepository
+		password   utils.Password
+		jwtService JWTService
+	}
+)
+
+// Login implements UserService
+func (u *userServiceImpl) Login(user dto.LoginRequest, ctx context.Context) (string, error) {
+	userModel, err := u.repo.FindUserByEmail(user.Email, ctx)
+	if err != nil {
+		return "", err
+	}
+	if !u.password.CheckPasswordHash(user.Password, userModel.Password) {
+		return "", utils.ErrInvalidPassword
+	}
+	token, err := u.jwtService.GenerateToken(userModel)
+	if err != nil {
+		return "", err
+	}
+	return token, nil
 }
 
 // CreateAdmin implements UserService
-func (u *userServiceImpl) CreateAdmin() error {
+func (u *userServiceImpl) CreateDefaultAdmin() error {
 	var ctx context.Context
 	users, err := u.repo.FindAllUsers(ctx)
 	if err != nil {
@@ -70,6 +97,17 @@ func (u *userServiceImpl) FindAllUsers(ctx context.Context) (dto.UsersResponse, 
 	return usersDto, nil
 }
 
+// FindUser implements UserService
+func (u *userServiceImpl) FindUser(id string, ctx context.Context) (*dto.UserResponse, error) {
+	user, err := u.repo.FindUserByID(id, ctx)
+	if err != nil {
+		return nil, err
+	}
+	var userDto dto.UserResponse
+	userDto.FromModel(user)
+	return &userDto, nil
+}
+
 // UpdateUser implements UserService
 func (u *userServiceImpl) UpdateUser(id string, user dto.UserUpdate, ctx context.Context) error {
 	idUUID, err := uuid.Parse(id)
@@ -95,12 +133,13 @@ func (u *userServiceImpl) DeleteUser(id string, ctx context.Context) error {
 	return err
 }
 
-func NewUserService(repository repository.UserRepository, password utils.Password) UserService {
+func NewUserService(repository repository.UserRepository, password utils.Password, jwt JWTService) UserService {
 	userService := &userServiceImpl{
-		repo:     repository,
-		password: password,
+		repo:       repository,
+		password:   password,
+		jwtService: jwt,
 	}
-	err := userService.CreateAdmin()
+	err := userService.CreateDefaultAdmin()
 	if err != nil {
 		panic(err)
 	}

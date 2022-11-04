@@ -11,6 +11,7 @@ type UserRepository interface {
 	UpdateUser(user *model.User, ctx context.Context) error
 	DeleteUser(user *model.User, ctx context.Context) error
 	FindAllUsers(ctx context.Context) ([]model.User, error)
-	FindUserByEmail(Email string, ctx context.Context) (*model.User, error)
+	FindUserByEmail(email string, ctx context.Context) (*model.User, error)
+	FindUserByID(id string, ctx context.Context) (*model.User, error)
 	InitRole() error
 }

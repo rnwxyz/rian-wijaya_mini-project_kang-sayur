@@ -11,7 +11,7 @@ type RegionService interface {
 	importRegency() error
 	importDistrict() error
 	importVillage() error
-	FindProvince(id *string, ctx context.Context) ([]model.Province, error)
+	FindProvince(ctx context.Context) ([]model.Province, error)
 	FindRegency(id *string, ctx context.Context) ([]model.Regency, error)
 	FindDistrict(id *string, ctx context.Context) ([]model.District, error)
 	FindVillage(id *string, ctx context.Context) ([]model.Village, error)

@@ -6,15 +6,19 @@ import (
 	"github.com/go-playground/validator"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	pkgRegionController "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/region/controller"
+	pkgRegionRepository "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/region/repository"
+	pkgRegionService "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/region/service"
 	pkgUserController "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/user/controller"
 	pkgUserRepository "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/user/repository"
 	pkgUserService "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/user/service"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/config"
+	importcsv "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/import_csv"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils"
 	"gorm.io/gorm"
 )
 
-func InitRoute(e *echo.Echo, db *gorm.DB) {
+func InitGlobalRoute(e *echo.Echo, db *gorm.DB) {
 	// e.Use(middleware.Recover())
 	e.Validator = &utils.CustomValidator{
 		Validator: validator.New(),
@@ -28,9 +32,16 @@ func InitRoute(e *echo.Echo, db *gorm.DB) {
 	auth := v1.Group("")
 	auth.Use(middleware.JWT([]byte(config.Cfg.JWT_SECRET)))
 
-	//init userController
+	//init user controller
 	userRepository := pkgUserRepository.NewUserRepository(db)
 	userService := pkgUserService.NewUserService(userRepository, utils.Password{}, jwtService)
 	userController := pkgUserController.NewUserController(userService, jwtService)
 	userController.InitRoute(v1, auth)
+
+	//init region controller
+	importCsvService := importcsv.NewImportCsv()
+	regionRepository := pkgRegionRepository.NewRegionRepository(db)
+	regionService := pkgRegionService.NewRegionService(regionRepository, importCsvService)
+	regionController := pkgRegionController.NewRegionController(regionService)
+	regionController.InitRoute(auth)
 }

@@ -11,15 +11,10 @@ type regionRepositoryImpl struct {
 	db *gorm.DB
 }
 
-// FindDistrict implements RegionRepository
-func (r *regionRepositoryImpl) FindDistrict(district *model.District, ctx context.Context) ([]model.District, error) {
-	panic("unimplemented")
-}
-
 // FindProvince implements RegionRepository
-func (r *regionRepositoryImpl) FindProvince(province *model.Province, ctx context.Context) ([]model.Province, error) {
+func (r *regionRepositoryImpl) FindProvince(ctx context.Context) ([]model.Province, error) {
 	var provinces []model.Province
-	err := r.db.WithContext(ctx).Where(province).Find(provinces).Error
+	err := r.db.WithContext(ctx).Find(&provinces).Error
 	if err != nil {
 		return nil, err
 	}
@@ -28,12 +23,32 @@ func (r *regionRepositoryImpl) FindProvince(province *model.Province, ctx contex
 
 // FindRegency implements RegionRepository
 func (r *regionRepositoryImpl) FindRegency(regency *model.Regency, ctx context.Context) ([]model.Regency, error) {
-	panic("unimplemented")
+	var regencies []model.Regency
+	err := r.db.WithContext(ctx).Preload("Province").Where(regency).Find(&regencies).Error
+	if err != nil {
+		return nil, err
+	}
+	return regencies, err
+}
+
+// FindDistrict implements RegionRepository
+func (r *regionRepositoryImpl) FindDistrict(district *model.District, ctx context.Context) ([]model.District, error) {
+	var districts []model.District
+	err := r.db.WithContext(ctx).Preload("Regency").Where(district).Find(&districts).Error
+	if err != nil {
+		return nil, err
+	}
+	return districts, err
 }
 
 // FindVillage implements RegionRepository
 func (r *regionRepositoryImpl) FindVillage(village *model.Village, ctx context.Context) ([]model.Village, error) {
-	panic("unimplemented")
+	var villages []model.Village
+	err := r.db.WithContext(ctx).Preload("District").Where(village).Find(&villages).Error
+	if err != nil {
+		return nil, err
+	}
+	return villages, err
 }
 
 // CheckIsImported implements RegionRepository

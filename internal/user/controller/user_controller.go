@@ -74,7 +74,7 @@ func (u *userController) Login(c echo.Context) error {
 	}
 	token, err := u.service.Login(user, c.Request().Context())
 	if err != nil {
-		if err == utils.ErrUserNotFound || err == utils.ErrInvalidPassword {
+		if err == utils.ErrNotFound || err == utils.ErrInvalidPassword {
 			return c.JSON(http.StatusBadRequest, echo.Map{
 				"message": err.Error(),
 			})

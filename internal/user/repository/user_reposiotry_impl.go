@@ -33,7 +33,7 @@ func (u *userRepositoryImpl) FindUserByEmail(email string, ctx context.Context) 
 	err := u.db.WithContext(ctx).Select([]string{"id", "email", "password", "role_id"}).Where("email = ?", email).First(&user).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return nil, utils.ErrUserNotFound
+			return nil, utils.ErrNotFound
 		}
 		return nil, err
 	}
@@ -46,7 +46,7 @@ func (u *userRepositoryImpl) FindUserByID(id string, ctx context.Context) (*mode
 	err := u.db.WithContext(ctx).Preload("Province").Preload("Regency").Preload("District").Preload("Village").Where("id = ?", id).First(&user).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return nil, utils.ErrUserNotFound
+			return nil, utils.ErrNotFound
 		}
 		return nil, err
 	}
@@ -75,7 +75,7 @@ func (u *userRepositoryImpl) UpdateUser(user *model.User, ctx context.Context) e
 		return res.Error
 	}
 	if res.RowsAffected == 0 {
-		return utils.ErrUserNotFound
+		return utils.ErrNotFound
 	}
 	return nil
 }
@@ -85,7 +85,7 @@ func (u *userRepositoryImpl) DeleteUser(user *model.User, ctx context.Context) e
 	err := u.db.WithContext(ctx).First(user).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return utils.ErrUserNotFound
+			return utils.ErrNotFound
 		}
 		return err
 	}

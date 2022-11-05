@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/region/dto"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/region/repository"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/constants"
 	importcsv "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/import_csv"
@@ -17,23 +18,6 @@ type regionServiceImpl struct {
 	importCsv importcsv.ImportCsv
 }
 
-// FindDistrict implements RegionService
-func (r *regionServiceImpl) FindDistrict(id *string, ctx context.Context) ([]model.District, error) {
-	var district model.District
-	if id != nil {
-		idInt, err := strconv.Atoi(*id)
-		if err != nil {
-			return nil, utils.ErrInvalidId
-		}
-		district.RegencyID = uint(idInt)
-	}
-	districts, err := r.repo.FindDistrict(&district, ctx)
-	if err != nil {
-		return nil, err
-	}
-	return districts, nil
-}
-
 // FindProvince implements RegionService
 func (r *regionServiceImpl) FindProvince(ctx context.Context) ([]model.Province, error) {
 	provinces, err := r.repo.FindProvince(ctx)
@@ -44,7 +28,7 @@ func (r *regionServiceImpl) FindProvince(ctx context.Context) ([]model.Province,
 }
 
 // FindRegency implements RegionService
-func (r *regionServiceImpl) FindRegency(id *string, ctx context.Context) ([]model.Regency, error) {
+func (r *regionServiceImpl) FindRegency(id *string, ctx context.Context) (dto.RegenciesResponse, error) {
 	var regency model.Regency
 	if id != nil {
 		idInt, err := strconv.Atoi(*id)
@@ -53,15 +37,36 @@ func (r *regionServiceImpl) FindRegency(id *string, ctx context.Context) ([]mode
 		}
 		regency.ProvinceID = uint(idInt)
 	}
-	regencys, err := r.repo.FindRegency(&regency, ctx)
+	regenciesModel, err := r.repo.FindRegency(&regency, ctx)
 	if err != nil {
 		return nil, err
 	}
-	return regencys, nil
+	var regencies dto.RegenciesResponse
+	regencies.FromModel(regenciesModel)
+	return regencies, nil
+}
+
+// FindDistrict implements RegionService
+func (r *regionServiceImpl) FindDistrict(id *string, ctx context.Context) (dto.DistrictsResponse, error) {
+	var district model.District
+	if id != nil {
+		idInt, err := strconv.Atoi(*id)
+		if err != nil {
+			return nil, utils.ErrInvalidId
+		}
+		district.RegencyID = uint(idInt)
+	}
+	districtsModel, err := r.repo.FindDistrict(&district, ctx)
+	if err != nil {
+		return nil, err
+	}
+	var districts dto.DistrictsResponse
+	districts.FromModel(districtsModel)
+	return districts, nil
 }
 
 // FindVillage implements RegionService
-func (r *regionServiceImpl) FindVillage(id *string, ctx context.Context) ([]model.Village, error) {
+func (r *regionServiceImpl) FindVillage(id *string, ctx context.Context) (dto.VillagesResponse, error) {
 	var village model.Village
 	if id != nil {
 		idInt, err := strconv.Atoi(*id)
@@ -70,10 +75,12 @@ func (r *regionServiceImpl) FindVillage(id *string, ctx context.Context) ([]mode
 		}
 		village.DistrictID = uint(idInt)
 	}
-	villages, err := r.repo.FindVillage(&village, ctx)
+	villagesModel, err := r.repo.FindVillage(&village, ctx)
 	if err != nil {
 		return nil, err
 	}
+	var villages dto.VillagesResponse
+	villages.FromModel(villagesModel)
 	return villages, nil
 }
 

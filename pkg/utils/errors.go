@@ -12,4 +12,5 @@ var (
 	ErrInvalidPassword              = errors.New("invalid password")
 	ErrPermission                   = errors.New("not have permission to access")
 	ErrInvalidParam                 = errors.New("invalid param")
+	ErrDuplicateData                = errors.New("data duplicate")
 )

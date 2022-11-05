@@ -6,14 +6,13 @@ import (
 )
 
 type CheckpointRequest struct {
-	ID          uuid.UUID `json:"id"`
-	Name        string    `json:"name" validate:"required"`
-	Description string    `json:"description"`
-	ProvinceID  uint      `json:"province_id" validate:"required"`
-	RegencyID   uint      `json:"regency_id" validate:"required"`
-	DistrictID  uint      `json:"district_id" validate:"required"`
-	VillageID   uint      `json:"village_id" validate:"required"`
-	LatLong     string    `json:"lat_long" validate:"required"`
+	Name        string `json:"name" validate:"required"`
+	Description string `json:"description"`
+	ProvinceID  uint   `json:"province_id" validate:"required"`
+	RegencyID   uint   `json:"regency_id" validate:"required"`
+	DistrictID  uint   `json:"district_id" validate:"required"`
+	VillageID   uint   `json:"village_id" validate:"required"`
+	LatLong     string `json:"lat_long" validate:"required"`
 }
 
 func (u *CheckpointRequest) ToModel() *model.Checkpoint {
@@ -54,8 +53,8 @@ type CheckpointsResponse []CheckpointResponse
 
 func (u *CheckpointsResponse) FromModel(model []model.Checkpoint) {
 	for _, each := range model {
-		var Checkpoint CheckpointResponse
-		Checkpoint.FromModel(&each)
-		*u = append(*u, Checkpoint)
+		var checkpoint CheckpointResponse
+		checkpoint.FromModel(&each)
+		*u = append(*u, checkpoint)
 	}
 }

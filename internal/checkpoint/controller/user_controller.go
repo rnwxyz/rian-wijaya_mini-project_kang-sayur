@@ -50,7 +50,7 @@ func (u *checkpointController) CreateCheckpoint(c echo.Context) error {
 	if err != nil {
 		if err == utils.ErrBadRequestBody {
 			return c.JSON(http.StatusBadRequest, echo.Map{
-				"message": utils.ErrBadRequestBody.Error()})
+				"message": err.Error()})
 		}
 		return c.JSON(http.StatusInternalServerError, echo.Map{
 			"message": err.Error(),

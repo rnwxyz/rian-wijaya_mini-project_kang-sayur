@@ -9,6 +9,9 @@ import (
 	pkgCheckpointController "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/checkpoint/controller"
 	pkgCheckpointRepository "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/checkpoint/repository"
 	pkgCheckpointService "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/checkpoint/service"
+	pkgItemController "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/item/controller"
+	pkgItemRepository "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/item/repository"
+	pkgItemService "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/item/service"
 	pkgRegionController "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/region/controller"
 	pkgRegionRepository "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/region/repository"
 	pkgRegionService "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/region/service"
@@ -53,4 +56,10 @@ func InitGlobalRoute(e *echo.Echo, db *gorm.DB) {
 	checkpointService := pkgCheckpointService.NewCheckpointService(checkpointRepository)
 	checkpointController := pkgCheckpointController.NewCheckpointController(checkpointService, jwtService)
 	checkpointController.InitRoute(auth)
+
+	// init item controller
+	itemRepository := pkgItemRepository.NewItemRepository(db)
+	itemService := pkgItemService.NewItemService(itemRepository)
+	itemController := pkgItemController.NewItemController(itemService, jwtService)
+	itemController.InitRoute(auth)
 }

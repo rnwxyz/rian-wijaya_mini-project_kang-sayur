@@ -6,6 +6,9 @@ import (
 	"github.com/go-playground/validator"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	pkgCheckpointController "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/checkpoint/controller"
+	pkgCheckpointRepository "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/checkpoint/repository"
+	pkgCheckpointService "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/checkpoint/service"
 	pkgRegionController "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/region/controller"
 	pkgRegionRepository "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/region/repository"
 	pkgRegionService "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/region/service"
@@ -44,4 +47,10 @@ func InitGlobalRoute(e *echo.Echo, db *gorm.DB) {
 	regionService := pkgRegionService.NewRegionService(regionRepository, importCsvService)
 	regionController := pkgRegionController.NewRegionController(regionService)
 	regionController.InitRoute(auth)
+
+	// init checkpoint controller
+	checkpointRepository := pkgCheckpointRepository.NewCheckpointRepository(db)
+	checkpointService := pkgCheckpointService.NewCheckpointService(checkpointRepository)
+	checkpointController := pkgCheckpointController.NewCheckpointController(checkpointService, jwtService)
+	checkpointController.InitRoute(auth)
 }

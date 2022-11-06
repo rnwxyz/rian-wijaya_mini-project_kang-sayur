@@ -1,0 +1,80 @@
+package repository
+
+import (
+	"context"
+	"strings"
+
+	"github.com/google/uuid"
+	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/constants"
+	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/model"
+	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils"
+	"gorm.io/gorm"
+)
+
+type orderRepositoryImpl struct {
+	db *gorm.DB
+}
+
+// CreateOrder implements OrderRepository
+func (r *orderRepositoryImpl) CreateOrder(order *model.Order, ctx context.Context) error {
+	err := r.db.WithContext(ctx).Create(order).Error
+	if err != nil {
+		if strings.Contains(err.Error(), "Duplicate entry") {
+			return utils.ErrDuplicateData
+		}
+		return err
+	}
+	return nil
+}
+
+// FindOrder implements OrderRepository
+func (r *orderRepositoryImpl) FindOrder(userId uuid.UUID, ctx context.Context) ([]model.Order, error) {
+	var orders []model.Order
+	err := r.db.WithContext(ctx).Where("user_id = ?", userId).Find(&orders).Error
+	if err != nil {
+		return nil, err
+	}
+	return orders, err
+}
+
+// FindOrderDetail implements OrderRepository
+func (r *orderRepositoryImpl) FindOrderDetail(order *model.Order, ctx context.Context) error {
+	err := r.db.WithContext(ctx).Where("user_id = ? AND id = ?", order.UserID, order.ID).Preload("OrderDetail").Find(&order).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return utils.ErrNotFound
+		}
+		return err
+	}
+	return nil
+}
+
+// CencelOrder implements OrderRepository
+func (r *orderRepositoryImpl) CencelOrder(orderId uuid.UUID, ctx context.Context) error {
+	res := r.db.WithContext(ctx).Model(&model.Order{}).Where("id = ?", orderId).Update("status_order_id", constants.Cencel_status_order_id)
+	if res.Error != nil {
+		return res.Error
+	}
+	if res.RowsAffected == 0 {
+		return utils.ErrNotFound
+	}
+	return nil
+}
+
+// OrderReady implements OrderRepository
+func (r *orderRepositoryImpl) OrderReady(orderId uuid.UUID, ctx context.Context) error {
+	res := r.db.WithContext(ctx).Model(&model.Order{}).Where("id = ?", orderId).Update("status_order_id", constants.Ready_status_order_id)
+	if res.Error != nil {
+		return res.Error
+	}
+	if res.RowsAffected == 0 {
+		return utils.ErrNotFound
+	}
+	return nil
+}
+
+func NewOrderRepository(db *gorm.DB) OrderRepository {
+	return &orderRepositoryImpl{
+		db: db,
+	}
+}

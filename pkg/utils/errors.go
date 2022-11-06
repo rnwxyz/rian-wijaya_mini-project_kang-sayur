@@ -13,4 +13,5 @@ var (
 	ErrPermission                   = errors.New("not have permission to access")
 	ErrInvalidParam                 = errors.New("invalid param")
 	ErrDuplicateData                = errors.New("data duplicate")
+	ErrTimeLocation                 = errors.New("time location error")
 )

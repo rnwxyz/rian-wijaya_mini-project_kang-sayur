@@ -57,7 +57,14 @@ func (r *itemRepositoryImpl) FindCategories(ctx context.Context) ([]model.Catego
 
 // FindItemById implements ItemRepository
 func (r *itemRepositoryImpl) FindItemById(item *model.Item, ctx context.Context) error {
-	panic("unimplemented")
+	err := r.db.WithContext(ctx).First(item).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return utils.ErrNotFound
+		}
+		return err
+	}
+	return nil
 }
 
 // FindItems implements ItemRepository

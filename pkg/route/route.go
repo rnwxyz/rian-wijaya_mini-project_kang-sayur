@@ -1,8 +1,6 @@
 package route
 
 import (
-	"time"
-
 	"github.com/go-playground/validator"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -19,6 +17,7 @@ import (
 	pkgUserRepository "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/user/repository"
 	pkgUserService "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/user/service"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/config"
+	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/constants"
 	importcsv "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/import_csv"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils"
 	"gorm.io/gorm"
@@ -29,7 +28,7 @@ func InitGlobalRoute(e *echo.Echo, db *gorm.DB) {
 	e.Validator = &utils.CustomValidator{
 		Validator: validator.New(),
 	}
-	jwtService := utils.NewJWTService(config.Cfg.JWT_SECRET, 1*time.Hour)
+	jwtService := utils.NewJWTService(config.Cfg.JWT_SECRET, constants.ExpToken)
 
 	api := e.Group("/api")
 

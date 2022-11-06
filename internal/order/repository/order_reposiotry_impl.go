@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/config"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/constants"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/model"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils"
@@ -23,6 +24,9 @@ func (r *orderRepositoryImpl) CreateOrder(order *model.Order, ctx context.Contex
 		if strings.Contains(err.Error(), "Duplicate entry") {
 			return utils.ErrDuplicateData
 		}
+		if strings.Contains(err.Error(), "Cannot add or update a child row") {
+			return utils.ErrBadRequestBody
+		}
 		return err
 	}
 	return nil
@@ -31,7 +35,7 @@ func (r *orderRepositoryImpl) CreateOrder(order *model.Order, ctx context.Contex
 // FindOrder implements OrderRepository
 func (r *orderRepositoryImpl) FindOrder(userId uuid.UUID, ctx context.Context) ([]model.Order, error) {
 	var orders []model.Order
-	err := r.db.WithContext(ctx).Where("user_id = ?", userId).Preload("StatusOrder").Find(&orders).Error
+	err := r.db.WithContext(ctx).Where("user_id = ?", userId).Preload("StatusOrder").Preload("User").Preload("Checkpoint").Find(&orders).Error
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +44,7 @@ func (r *orderRepositoryImpl) FindOrder(userId uuid.UUID, ctx context.Context) (
 
 // FindOrderDetail implements OrderRepository
 func (r *orderRepositoryImpl) FindOrderDetail(order *model.Order, ctx context.Context) error {
-	err := r.db.WithContext(ctx).Where("user_id = ? AND id = ?", order.UserID, order.ID).Preload("OrderDetail").Preload("StatusOrder").Find(&order).Error
+	err := r.db.WithContext(ctx).Where("user_id = ? AND id = ?", order.UserID, order.ID).Preload("OrderDetail").Preload("StatusOrder").Preload("Checkpoint").Find(&order).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return utils.ErrNotFound
@@ -53,7 +57,7 @@ func (r *orderRepositoryImpl) FindOrderDetail(order *model.Order, ctx context.Co
 // FindAllOrders implements OrderRepository
 func (r *orderRepositoryImpl) FindAllOrders(ctx context.Context) ([]model.Order, error) {
 	var orders []model.Order
-	err := r.db.WithContext(ctx).Preload("OrderDetail").Preload("StatusOrder").Find(&orders).Error
+	err := r.db.WithContext(ctx).Preload("OrderDetail").Preload("StatusOrder").Preload("User").Find(&orders).Error
 	if err != nil {
 		return nil, err
 	}
@@ -95,10 +99,15 @@ func (r *orderRepositoryImpl) OrderDone(orderId uuid.UUID, ctx context.Context) 
 	order := model.Order{
 		ID: orderId,
 	}
-	var newTime time.Time
+	loc, err := time.LoadLocation(config.Cfg.TIME_LOCATION)
+	if err != nil {
+		return utils.ErrTimeLocation
+	}
+	// set zero
+	zeroTime := time.Date(int(1), time.January, int(1), int(0), int(0), int(0), int(0), loc)
 	res := r.db.WithContext(ctx).Model(&order).Updates(&model.Order{
 		StatusOrderID: constants.Success_status_order_id,
-		ExpiredOrder:  newTime,
+		ExpiredOrder:  zeroTime,
 	})
 	if res.Error != nil {
 		return res.Error

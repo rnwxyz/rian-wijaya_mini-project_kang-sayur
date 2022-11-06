@@ -117,7 +117,7 @@ func (u *itemController) UpdateItem(c echo.Context) error {
 	}
 	err := u.service.UpdateItem(id, itemBody, c.Request().Context())
 	if err != nil {
-		if err == utils.ErrBadRequestBody || err == utils.ErrDuplicateData {
+		if err == utils.ErrBadRequestBody || err == utils.ErrDuplicateData || err == utils.ErrInvalidId {
 			return c.JSON(http.StatusBadRequest, echo.Map{
 				"message": err.Error()})
 		}

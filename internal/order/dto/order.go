@@ -8,7 +8,7 @@ import (
 )
 
 type OrderRequest struct {
-	CheckpointID uuid.UUID           `json:"checkpoint_id" validate:"required"`
+	CheckpointID string              `json:"checkpoint_id" validate:"required"`
 	Order        OrderDetailsRequest `json:"order" validate:"required"`
 }
 type OrderResponse struct {
@@ -22,7 +22,6 @@ type OrderResponse struct {
 	ShippingCost    int       `json:"shipping_cost"`
 	TotalPrice      int       `json:"total_price"`
 	GrandTotal      int       `json:"grand_total"`
-	Hash            string    `json:"code"`
 	ExpiredOrder    time.Time `json:"expired_order"`
 }
 
@@ -37,7 +36,6 @@ func (u *OrderResponse) FromModel(model *model.Order) {
 	u.ShippingCost = model.ShippingCost
 	u.TotalPrice = model.TotalPrice
 	u.GrandTotal = model.GrandTotal
-	u.Hash = model.Hash
 	u.ExpiredOrder = model.ExpiredOrder
 }
 

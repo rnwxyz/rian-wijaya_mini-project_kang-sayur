@@ -28,6 +28,7 @@ func NewOrderController(service service.OrderService, jwt JWTService) *orderCont
 
 func (u *orderController) InitRoute(auth *echo.Group) {
 	auth.POST("/order", u.CreateOrder)
+	auth.POST("/order/takeorder", u.TakeOrder)
 	auth.GET("/order", u.GetOrder)
 	auth.GET("/order/:id", u.GetOrderDetail)
 	auth.PUT("/order/:id/cencel", u.CencelOrder)
@@ -107,6 +108,32 @@ func (u *orderController) CencelOrder(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, echo.Map{
 		"message": "order cencelled",
+	})
+}
+
+func (u *orderController) TakeOrder(c echo.Context) error {
+	claims := u.jwtService.GetClaims(&c)
+	role := claims["role_id"].(float64)
+	if role < 3 {
+		return c.JSON(http.StatusForbidden, echo.Map{
+			"message": utils.ErrPermission.Error(),
+		})
+	}
+	var takeOrder dto.TakeOrder
+	if err := c.Bind(&takeOrder); err != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{
+			"message": utils.ErrOrderCode.Error()})
+	}
+	if err := c.Validate(takeOrder); err != nil {
+		return err
+	}
+	err := u.service.TakeOrder(takeOrder.Code, c.Request().Context())
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{
+			"message": utils.ErrOrderCode.Error()})
+	}
+	return c.JSON(http.StatusOK, echo.Map{
+		"message": "success take order",
 	})
 }
 

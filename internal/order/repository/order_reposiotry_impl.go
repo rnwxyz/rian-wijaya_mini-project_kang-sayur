@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/constants"
@@ -61,7 +62,10 @@ func (r *orderRepositoryImpl) FindAllOrders(ctx context.Context) ([]model.Order,
 
 // CencelOrder implements OrderRepository
 func (r *orderRepositoryImpl) CencelOrder(orderId uuid.UUID, ctx context.Context) error {
-	res := r.db.WithContext(ctx).Model(&model.Order{}).Where("id = ?", orderId).Update("status_order_id", constants.Cencel_status_order_id)
+	order := model.Order{
+		ID: orderId,
+	}
+	res := r.db.WithContext(ctx).Model(&order).Update("status_order_id", constants.Cencel_status_order_id)
 	if res.Error != nil {
 		return res.Error
 	}
@@ -73,7 +77,29 @@ func (r *orderRepositoryImpl) CencelOrder(orderId uuid.UUID, ctx context.Context
 
 // OrderReady implements OrderRepository
 func (r *orderRepositoryImpl) OrderReady(orderId uuid.UUID, ctx context.Context) error {
-	res := r.db.WithContext(ctx).Model(&model.Order{}).Where("id = ?", orderId).Update("status_order_id", constants.Ready_status_order_id)
+	order := model.Order{
+		ID: orderId,
+	}
+	res := r.db.WithContext(ctx).Model(&order).Update("status_order_id", constants.Ready_status_order_id)
+	if res.Error != nil {
+		return res.Error
+	}
+	if res.RowsAffected == 0 {
+		return utils.ErrNotFound
+	}
+	return nil
+}
+
+// OrderDone implements OrderRepository
+func (r *orderRepositoryImpl) OrderDone(orderId uuid.UUID, ctx context.Context) error {
+	order := model.Order{
+		ID: orderId,
+	}
+	var newTime time.Time
+	res := r.db.WithContext(ctx).Model(&order).Updates(&model.Order{
+		StatusOrderID: constants.Success_status_order_id,
+		ExpiredOrder:  newTime,
+	})
 	if res.Error != nil {
 		return res.Error
 	}

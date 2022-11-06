@@ -8,29 +8,36 @@ import (
 )
 
 type OrderRequest struct {
-	Order OrderDetailsRequest `json:"order"`
+	CheckpointID uuid.UUID           `json:"checkpoint_id" validate:"required"`
+	Order        OrderDetailsRequest `json:"order" validate:"required"`
 }
 type OrderResponse struct {
 	ID              uuid.UUID `json:"id"`
 	UserID          uuid.UUID `json:"user_id"`
+	UserName        string    `json:"user_name"`
+	CheckpointID    uuid.UUID `json:"checkpoint_id"`
+	CheckpointName  string    `json:"checkpoint_name"`
 	CreatedAt       time.Time `json:"created_at"`
 	StatusOrderName string    `json:"status_order"`
 	ShippingCost    int       `json:"shipping_cost"`
 	TotalPrice      int       `json:"total_price"`
 	GrandTotal      int       `json:"grand_total"`
-	Code            string    `json:"code"`
+	Hash            string    `json:"code"`
 	ExpiredOrder    time.Time `json:"expired_order"`
 }
 
 func (u *OrderResponse) FromModel(model *model.Order) {
 	u.ID = model.ID
 	u.UserID = model.UserID
+	u.UserName = model.User.Name
+	u.CheckpointID = model.CheckpointID
+	u.CheckpointName = model.Checkpoint.Name
 	u.CreatedAt = model.CreatedAt
 	u.StatusOrderName = model.StatusOrder.Name
 	u.ShippingCost = model.ShippingCost
 	u.TotalPrice = model.TotalPrice
 	u.GrandTotal = model.GrandTotal
-	u.Code = model.Code
+	u.Hash = model.Hash
 	u.ExpiredOrder = model.ExpiredOrder
 }
 
@@ -46,12 +53,14 @@ func (u *OrdersResponse) FromModel(model []model.Order) {
 
 type OrderWithDetailResponse struct {
 	ID              uuid.UUID            `json:"id"`
+	CheckpointID    uuid.UUID            `json:"checkpoint_id"`
+	CheckpointName  string               `json:"checkpoint_name"`
 	CreatedAt       time.Time            `json:"created_at"`
 	StatusOrderName string               `json:"status_order"`
 	ShippingCost    int                  `json:"shipping_cost"`
 	TotalPrice      int                  `json:"total_price"`
 	GrandTotal      int                  `json:"grand_total"`
-	Code            string               `json:"code"`
+	Hash            string               `json:"code"`
 	ExpiredOrder    time.Time            `json:"expired_order"`
 	OrderDetail     OrderDetailsResponse `json:"order_detail"`
 }
@@ -61,12 +70,19 @@ func (u *OrderWithDetailResponse) FromModel(model *model.Order) {
 	od.FromModel(model.OrderDetail)
 
 	u.ID = model.ID
+	u.CheckpointID = model.CheckpointID
+	u.CheckpointName = model.Checkpoint.Name
 	u.CreatedAt = model.CreatedAt
 	u.StatusOrderName = model.StatusOrder.Name
 	u.ShippingCost = model.ShippingCost
 	u.TotalPrice = model.TotalPrice
 	u.GrandTotal = model.GrandTotal
-	u.Code = model.Code
+	u.Hash = model.Hash
 	u.ExpiredOrder = model.ExpiredOrder
 	u.OrderDetail = od
+}
+
+type TakeOrder struct {
+	CheckpointID string `json:"checkpoint_id"`
+	Code         string `json:"code" validate:"required"`
 }

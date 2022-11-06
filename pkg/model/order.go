@@ -1,10 +1,11 @@
 package model
 
 import (
+	"encoding/base64"
+	"math/rand"
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/constants"
 	"gorm.io/gorm"
 )
 
@@ -15,6 +16,8 @@ type Order struct {
 	DeletedAt     gorm.DeletedAt `gorm:"index"`
 	UserID        uuid.UUID      `gorm:"; type:varchar(50)"`
 	User          User           `gorm:"constraint:OnUpdate:NO ACTION,OnDelete:NO ACTION;"`
+	CheckpointID  uuid.UUID
+	Checkpoint    Checkpoint
 	StatusOrderID uint
 	StatusOrder   StatusOrder
 	ShippingCost  int
@@ -22,6 +25,7 @@ type Order struct {
 	GrandTotal    int
 	OrderDetail   []OrderDetail `gorm:"polymorphic:Order;"`
 	Code          string
+	Hash          string
 	ExpiredOrder  time.Time
 }
 
@@ -49,8 +53,9 @@ type OrderDetail struct {
 	Total     int
 }
 
+// gorm hooks or trigger
 func (u *Order) AfterCreate(tx *gorm.DB) (err error) {
-	for _, ord := range u.OrderDetail {
+	for _, ord := range u.OrderDetail { // create order item qty--
 		var item Item
 		tx.Model(&Item{}).Where("id = ?", ord.ItemID).First(&item)
 		newQty := item.Qty - ord.Qty
@@ -60,7 +65,7 @@ func (u *Order) AfterCreate(tx *gorm.DB) (err error) {
 }
 
 func (u *Order) AfterUpdate(tx *gorm.DB) (err error) {
-	if u.StatusOrderID == constants.Cencel_status_order_id {
+	if u.StatusOrderID == 7 { // order cencel item qty++
 		var or Order
 		tx.Model(&Order{}).Where("id = ?", u.ID).Preload("OrderDetail").First(&or)
 		for _, ord := range or.OrderDetail {
@@ -69,6 +74,29 @@ func (u *Order) AfterUpdate(tx *gorm.DB) (err error) {
 			newQty := item.Qty + ord.Qty
 			tx.Model(&Item{}).Where("id = ?", ord.ItemID).Update("qty", newQty)
 		}
+		var newTime time.Time
+		tx.Model(&Order{}).Where("id = ?", u.ID).Update("expired_time", newTime)
+	} else if u.StatusOrderID == 3 { // order ready generate code
+		var order Order
+		tx.Model(&Order{}).Where("id = ?", u.ID).First(&order)
+		// Generating Random string
+		ran_str := make([]byte, 5)
+		for i := 0; i < 5; i++ {
+			ran_str[i] = byte(48 + rand.Intn(10))
+		}
+		rand := string(ran_str)
+		text := order.ID.String() + " " + rand + " " + order.CheckpointID.String()
+		str := base64.StdEncoding.EncodeToString([]byte(text))
+		if err != nil {
+			panic(err)
+		}
+		tx.Model(&Order{}).Where("id = ?", u.ID).Update("hash", str)
+		tx.Model(&Order{}).Where("id = ?", u.ID).Update("code", rand)
+		loc, err := time.LoadLocation("Asia/Makassar")
+		if err != nil {
+			panic(err)
+		}
+		tx.Model(&Order{}).Where("id = ?", u.ID).Update("expired_time", time.Now().In(loc).Add(12*time.Hour))
 	}
 	return
 }

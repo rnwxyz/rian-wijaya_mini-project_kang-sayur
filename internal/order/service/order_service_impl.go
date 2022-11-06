@@ -2,6 +2,8 @@ package service
 
 import (
 	"context"
+	"encoding/base64"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -103,6 +105,39 @@ func (s *orderServiceImpl) FindOrderDetail(userId string, orderId string, ctx co
 	var orderDetailReponse dto.OrderWithDetailResponse
 	orderDetailReponse.FromModel(&order)
 	return &orderDetailReponse, nil
+}
+
+// TakeOrder implements OrderService
+func (s *orderServiceImpl) TakeOrder(code string, ctx context.Context) error {
+	byt, err := base64.StdEncoding.DecodeString(code)
+	if err != nil {
+		return utils.ErrOrderCode
+	}
+	// data have 3 index orderId, order code, and checkpoint id
+	data := strings.Split(string(byt), " ")
+	id, err := uuid.Parse(data[0])
+	if err != nil {
+		return utils.ErrOrderCode
+	}
+	orderCode := data[1]
+	checkpointId, err := uuid.Parse(data[2])
+	if err != nil {
+		return utils.ErrOrderCode
+	}
+	order := model.Order{
+		ID:           id,
+		Code:         orderCode,
+		CheckpointID: checkpointId,
+	}
+	err = s.orderRepo.FindOrderDetail(&order, ctx)
+	if err != nil {
+		return utils.ErrOrderCode
+	}
+	err = s.orderRepo.OrderDone(id, ctx)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // FindAllOrders implements OrderService

@@ -92,7 +92,18 @@ func (s *itemServiceImpl) UpdateCategory(id string, body dto.CategoryRequest, ct
 
 // UpdateItem implements ItemService
 func (s *itemServiceImpl) UpdateItem(id string, body dto.ItemRequest, ctx context.Context) error {
-	panic("unimplemented")
+	itemId, err := strconv.Atoi(id)
+	if err != nil {
+		return utils.ErrInvalidId
+	}
+	item := body.ToModel()
+	item.ID = uint(itemId)
+
+	err = s.repo.UpdateItem(item, ctx)
+	if err != nil {
+		return err
+	}
+	return err
 }
 
 func NewItemService(repository repository.ItemRepository) ItemService {

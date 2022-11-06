@@ -13,4 +13,7 @@ var (
 	ErrPermission                   = errors.New("not have permission to access")
 	ErrInvalidParam                 = errors.New("invalid param")
 	ErrDuplicateData                = errors.New("data duplicate")
+	ErrTimeLocation                 = errors.New("time location error")
+	ErrQtyOrder                     = errors.New("order qty exceeds stock or less that 1")
+	ErrOrderCode                    = errors.New("invalid order code")
 )

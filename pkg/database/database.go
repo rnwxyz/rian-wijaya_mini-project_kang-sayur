@@ -25,5 +25,7 @@ func MigrateDB(db *gorm.DB) error {
 		model.User{},
 		model.Checkpoint{},
 		model.Item{},
+		model.Order{},
+		model.OrderDetail{},
 	)
 }

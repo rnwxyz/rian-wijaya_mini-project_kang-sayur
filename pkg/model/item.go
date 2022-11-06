@@ -12,7 +12,7 @@ type Item struct {
 	UpdatedAt   time.Time
 	DeletedAt   gorm.DeletedAt `gorm:"index"`
 	Name        string         `gorm:"not null;unique"`
-	CategoryId  uint
+	CategoryID  uint
 	Category    Category
 	Description string
 	Qty         int

@@ -28,6 +28,7 @@ func NewItemController(service service.ItemService, jwt JWTService) *itemControl
 func (u *itemController) InitRoute(auth *echo.Group) {
 	auth.POST("/item", u.CreateItem)
 	auth.GET("/item", u.GetItems)
+	auth.PUT("/item/:id", u.UpdateItem)
 	auth.POST("/item/category", u.CreateCategory)
 	auth.GET("/item/category", u.GetCategories)
 	auth.GET("/item/category/:category_id", u.GetItemsByCategory)
@@ -94,6 +95,38 @@ func (u *itemController) CreateCategory(c echo.Context) error {
 	return c.JSON(http.StatusOK, echo.Map{
 		"message": "new category success created",
 		"id":      id,
+	})
+}
+
+func (u *itemController) UpdateItem(c echo.Context) error {
+	claims := u.jwtService.GetClaims(&c)
+	role := claims["role_id"].(float64)
+	if role < 3 {
+		return c.JSON(http.StatusForbidden, echo.Map{
+			"message": utils.ErrPermission.Error(),
+		})
+	}
+	id := c.Param("id")
+	var itemBody dto.ItemRequest
+	if err := c.Bind(&itemBody); err != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{
+			"message": utils.ErrBadRequestBody.Error()})
+	}
+	if err := c.Validate(itemBody); err != nil {
+		return err
+	}
+	err := u.service.UpdateItem(id, itemBody, c.Request().Context())
+	if err != nil {
+		if err == utils.ErrBadRequestBody || err == utils.ErrDuplicateData {
+			return c.JSON(http.StatusBadRequest, echo.Map{
+				"message": err.Error()})
+		}
+		return c.JSON(http.StatusInternalServerError, echo.Map{
+			"message": err.Error(),
+		})
+	}
+	return c.JSON(http.StatusOK, echo.Map{
+		"message": "success update item",
 	})
 }
 

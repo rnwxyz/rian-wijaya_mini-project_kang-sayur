@@ -19,7 +19,7 @@ func (u *ItemRequest) ToModel() *model.Item {
 		Description: u.Description,
 		Qty:         u.Qty,
 		Price:       u.Price,
-		CategoryId:  u.CategoryID,
+		CategoryID:  u.CategoryID,
 	}
 }
 

@@ -15,6 +15,8 @@ type Config struct {
 	DEFAULT_ADMIN_EMAIL    string
 	DEFAULT_ADMIN_PASSWORD string
 	JWT_SECRET             string
+	TIME_LOCATION          string
+	ORDER_SECRET           string
 }
 
 var Cfg *Config

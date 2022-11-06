@@ -19,16 +19,6 @@ type orderServiceImpl struct {
 	itemRepo  it.ItemRepository
 }
 
-// CencelOder implements OrderService
-func (s *orderServiceImpl) CencelOder(orderId string, ctx context.Context) error {
-	id, err := uuid.Parse(orderId)
-	if err != nil {
-		return utils.ErrInvalidId
-	}
-	err = s.orderRepo.CencelOrder(id, ctx)
-	return err
-}
-
 // CreateOrder implements OrderService
 func (s *orderServiceImpl) CreateOrder(body dto.OrderDetailsRequest, userId string, ctx context.Context) (uuid.UUID, error) {
 	newId := uuid.New()
@@ -39,15 +29,19 @@ func (s *orderServiceImpl) CreateOrder(body dto.OrderDetailsRequest, userId stri
 	totalPrice := 0
 
 	// validating item and sum price
-	for _, ord := range body {
+	for i, ord := range body {
 		var item model.Item
 		item.ID = ord.ItemID
 		err := s.itemRepo.FindItemById(&item, ctx)
 		if err != nil {
-			return uuid.Nil, err
+			return uuid.Nil, utils.ErrBadRequestBody
 		}
-		ord.Total = (ord.Qty * item.Price)
-		totalPrice += ord.Total
+		if item.Qty < ord.Qty || ord.Qty < 1 {
+			return uuid.Nil, utils.ErrQtyOrder
+		}
+		body[i].Price = item.Price
+		body[i].Total = (ord.Qty * item.Price)
+		totalPrice += body[i].Total
 	}
 
 	orderDetail := body.ToModel()
@@ -109,6 +103,37 @@ func (s *orderServiceImpl) FindOrderDetail(userId string, orderId string, ctx co
 	var orderDetailReponse dto.OrderWithDetailResponse
 	orderDetailReponse.FromModel(&order)
 	return &orderDetailReponse, nil
+}
+
+// FindAllOrders implements OrderService
+func (s *orderServiceImpl) FindAllOrders(ctx context.Context) (dto.OrdersResponse, error) {
+	orders, err := s.orderRepo.FindAllOrders(ctx)
+	if err != nil {
+		return nil, err
+	}
+	var ordersResponse dto.OrdersResponse
+	ordersResponse.FromModel(orders)
+	return ordersResponse, nil
+}
+
+// OderReady implements OrderService
+func (s *orderServiceImpl) OrderReady(orderId string, ctx context.Context) error {
+	id, err := uuid.Parse(orderId)
+	if err != nil {
+		return utils.ErrInvalidId
+	}
+	err = s.orderRepo.OrderReady(id, ctx)
+	return err
+}
+
+// CencelOder implements OrderService
+func (s *orderServiceImpl) CencelOder(orderId string, ctx context.Context) error {
+	id, err := uuid.Parse(orderId)
+	if err != nil {
+		return utils.ErrInvalidId
+	}
+	err = s.orderRepo.CencelOrder(id, ctx)
+	return err
 }
 
 func NewOrderService(orRepository or.OrderRepository, itRepository it.ItemRepository) OrderService {

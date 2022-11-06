@@ -7,18 +7,12 @@ import (
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/model"
 )
 
-// type OrderRequest struct {
-// 	OrderDetail OrderDetailsRequest `json:"order_detail" validate:"required"`
-// }
-
-// func (u *OrderRequest) ToModel() *model.Order {
-// 	return &model.Order{
-// 		OrderDetail: *u.OrderDetail.ToModel(),
-// 	}
-// }
-
+type OrderRequest struct {
+	Order OrderDetailsRequest `json:"order"`
+}
 type OrderResponse struct {
 	ID              uuid.UUID `json:"id"`
+	UserID          uuid.UUID `json:"user_id"`
 	CreatedAt       time.Time `json:"created_at"`
 	StatusOrderName string    `json:"status_order"`
 	ShippingCost    int       `json:"shipping_cost"`
@@ -30,6 +24,7 @@ type OrderResponse struct {
 
 func (u *OrderResponse) FromModel(model *model.Order) {
 	u.ID = model.ID
+	u.UserID = model.UserID
 	u.CreatedAt = model.CreatedAt
 	u.StatusOrderName = model.StatusOrder.Name
 	u.ShippingCost = model.ShippingCost

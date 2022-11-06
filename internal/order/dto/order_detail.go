@@ -5,9 +5,10 @@ import (
 )
 
 type OrderDetailRequest struct {
-	ItemID uint `json:"item_id" validate:"gte=1,required"`
-	Qty    int  `json:"qty" validate:"gte=1,required"`
-	Total  int  `json:"total_price"`
+	ItemID uint `json:"item_id" validate:"gte=1, required"`
+	Qty    int  `json:"qty" validate:"gte=1, required"`
+	Price  int  `json:"price"`
+	Total  int  `json:"total"`
 }
 
 type OrderDetailsRequest []OrderDetailRequest
@@ -16,6 +17,7 @@ func (u *OrderDetailRequest) ToModel() *model.OrderDetail {
 	return &model.OrderDetail{
 		ItemID: u.ItemID,
 		Qty:    u.Qty,
+		Price:  u.Price,
 		Total:  u.Total,
 	}
 }

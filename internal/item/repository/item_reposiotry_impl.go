@@ -70,7 +70,7 @@ func (r *itemRepositoryImpl) FindItemById(item *model.Item, ctx context.Context)
 // FindItems implements ItemRepository
 func (r *itemRepositoryImpl) FindItems(ctx context.Context) ([]model.Item, error) {
 	var items []model.Item
-	err := r.db.WithContext(ctx).Find(&items).Error
+	err := r.db.WithContext(ctx).Preload("Category").Find(&items).Error
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +89,24 @@ func (r *itemRepositoryImpl) FindItemsByCategory(categoryId uint, ctx context.Co
 
 // UpdateItem implements ItemRepository
 func (r *itemRepositoryImpl) UpdateItem(item *model.Item, ctx context.Context) error {
-	panic("unimplemented")
+	err := r.db.WithContext(ctx).Model(&model.Item{}).Where("id = ?", item.ID).Updates(&model.Item{
+		Name:        item.Name,
+		Description: item.Description,
+		Qty:         item.Qty,
+		Price:       item.Price,
+		CategoryID:  item.CategoryID,
+	}).Error
+
+	if err != nil {
+		if strings.Contains(err.Error(), "Duplicate entry") {
+			return utils.ErrDuplicateData
+		}
+		if strings.Contains(err.Error(), "Cannot add or update a child row") {
+			return utils.ErrBadRequestBody
+		}
+		return err
+	}
+	return nil
 }
 
 func NewItemRepository(db *gorm.DB) ItemRepository {

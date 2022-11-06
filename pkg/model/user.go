@@ -8,7 +8,7 @@ import (
 )
 
 type User struct {
-	ID         uuid.UUID `gorm:"primaryKey"`
+	ID         uuid.UUID `gorm:"primaryKey; type:varchar(50)"`
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
 	DeletedAt  gorm.DeletedAt `gorm:"index"`

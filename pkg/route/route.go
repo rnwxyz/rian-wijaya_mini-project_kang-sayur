@@ -10,6 +10,9 @@ import (
 	pkgItemController "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/item/controller"
 	pkgItemRepository "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/item/repository"
 	pkgItemService "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/item/service"
+	pkgOrderController "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/order/controller"
+	pkgOrderRepository "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/order/repository"
+	pkgOrderService "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/order/service"
 	pkgRegionController "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/region/controller"
 	pkgRegionRepository "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/region/repository"
 	pkgRegionService "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/region/service"
@@ -61,4 +64,10 @@ func InitGlobalRoute(e *echo.Echo, db *gorm.DB) {
 	itemService := pkgItemService.NewItemService(itemRepository)
 	itemController := pkgItemController.NewItemController(itemService, jwtService)
 	itemController.InitRoute(auth)
+
+	// init order controller
+	orderRepository := pkgOrderRepository.NewOrderRepository(db)
+	orderService := pkgOrderService.NewOrderService(orderRepository, itemRepository)
+	orderController := pkgOrderController.NewOrderController(orderService, jwtService)
+	orderController.InitRoute(auth)
 }

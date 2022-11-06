@@ -74,8 +74,12 @@ func (u *Order) AfterUpdate(tx *gorm.DB) (err error) {
 			newQty := item.Qty + ord.Qty
 			tx.Model(&Item{}).Where("id = ?", ord.ItemID).Update("qty", newQty)
 		}
-		var newTime time.Time
-		tx.Model(&Order{}).Where("id = ?", u.ID).Update("expired_time", newTime)
+		loc, _ := time.LoadLocation("Asia/Makassar")
+		if err != nil {
+			panic(err)
+		}
+		zeroTime := time.Date(int(1), time.January, int(1), int(0), int(0), int(0), int(0), loc)
+		tx.Model(&Order{}).Where("id = ?", u.ID).Update("expired_time", zeroTime)
 	} else if u.StatusOrderID == 3 { // order ready generate code
 		var order Order
 		tx.Model(&Order{}).Where("id = ?", u.ID).First(&order)

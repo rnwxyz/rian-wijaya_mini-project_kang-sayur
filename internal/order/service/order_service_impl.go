@@ -22,16 +22,20 @@ type orderServiceImpl struct {
 }
 
 // CreateOrder implements OrderService
-func (s *orderServiceImpl) CreateOrder(body dto.OrderDetailsRequest, userId string, ctx context.Context) (uuid.UUID, error) {
+func (s *orderServiceImpl) CreateOrder(body dto.OrderRequest, userId string, ctx context.Context) (uuid.UUID, error) {
 	newId := uuid.New()
 	userIdUUID, err := uuid.Parse(userId)
+	if err != nil {
+		return uuid.Nil, utils.ErrInvalidId
+	}
+	checkpointIdUUID, err := uuid.Parse(body.CheckpointID)
 	if err != nil {
 		return uuid.Nil, utils.ErrInvalidId
 	}
 	totalPrice := 0
 
 	// validating item and sum price
-	for i, ord := range body {
+	for i, ord := range body.Order {
 		var item model.Item
 		item.ID = ord.ItemID
 		err := s.itemRepo.FindItemById(&item, ctx)
@@ -41,12 +45,12 @@ func (s *orderServiceImpl) CreateOrder(body dto.OrderDetailsRequest, userId stri
 		if item.Qty < ord.Qty || ord.Qty < 1 {
 			return uuid.Nil, utils.ErrQtyOrder
 		}
-		body[i].Price = item.Price
-		body[i].Total = (ord.Qty * item.Price)
-		totalPrice += body[i].Total
+		body.Order[i].Price = item.Price
+		body.Order[i].Total = (ord.Qty * item.Price)
+		totalPrice += body.Order[i].Total
 	}
 
-	orderDetail := body.ToModel()
+	orderDetail := body.Order.ToModel()
 	loc, err := time.LoadLocation(config.Cfg.TIME_LOCATION)
 	if err != nil {
 		return uuid.Nil, err
@@ -55,6 +59,7 @@ func (s *orderServiceImpl) CreateOrder(body dto.OrderDetailsRequest, userId stri
 	newOrder := model.Order{
 		ID:            newId,
 		UserID:        userIdUUID,
+		CheckpointID:  checkpointIdUUID,
 		ShippingCost:  constants.Shipping_cost,
 		StatusOrderID: constants.Pending_status_order_id,
 		TotalPrice:    totalPrice,

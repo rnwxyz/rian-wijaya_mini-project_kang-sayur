@@ -89,22 +89,25 @@ func (r *itemRepositoryImpl) FindItemsByCategory(categoryId uint, ctx context.Co
 
 // UpdateItem implements ItemRepository
 func (r *itemRepositoryImpl) UpdateItem(item *model.Item, ctx context.Context) error {
-	err := r.db.WithContext(ctx).Model(&model.Item{}).Where("id = ?", item.ID).Updates(&model.Item{
+	res := r.db.WithContext(ctx).Model(&model.Item{}).Where("id = ?", item.ID).Updates(&model.Item{
 		Name:        item.Name,
 		Description: item.Description,
 		Qty:         item.Qty,
 		Price:       item.Price,
 		CategoryID:  item.CategoryID,
-	}).Error
+	})
 
-	if err != nil {
-		if strings.Contains(err.Error(), "Duplicate entry") {
+	if res.Error != nil {
+		if strings.Contains(res.Error.Error(), "Duplicate entry") {
 			return utils.ErrDuplicateData
 		}
-		if strings.Contains(err.Error(), "Cannot add or update a child row") {
+		if strings.Contains(res.Error.Error(), "Cannot add or update a child row") {
 			return utils.ErrBadRequestBody
 		}
-		return err
+		return res.Error
+	}
+	if res.RowsAffected == 0 {
+		return utils.ErrInvalidId
 	}
 	return nil
 }

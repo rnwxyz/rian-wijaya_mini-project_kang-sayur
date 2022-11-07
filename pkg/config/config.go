@@ -23,7 +23,7 @@ func InitConfig() {
 	cfg := &Config{}
 
 	cfg.DB_ADDRESS = os.Getenv("DB_ADDRESS")
-	cfg.API_PORT = os.Getenv("API")
+	cfg.API_PORT = os.Getenv("API_PORT")
 	cfg.DB_USERNAME = os.Getenv("DB_USERNAME")
 	cfg.DB_PASSWORD = os.Getenv("DB_PASSWORD")
 	cfg.DB_NAME = os.Getenv("DB_NAME")

@@ -4,7 +4,6 @@ import (
 	"context"
 	"strings"
 
-	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/config"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/constants"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/model"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils"
@@ -82,22 +81,12 @@ func (u *userRepositoryImpl) UpdateUser(user *model.User, ctx context.Context) e
 
 // DeleteUser implements UserRepository
 func (u *userRepositoryImpl) DeleteUser(user *model.User, ctx context.Context) error {
-	err := u.db.WithContext(ctx).First(user).Error
-	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return utils.ErrNotFound
-		}
-		return err
-	}
-	if user.Email == config.Cfg.DEFAULT_ADMIN_EMAIL {
-		return utils.ErrNotAllowedDeleteDefaultAdmin
-	}
 	res := u.db.WithContext(ctx).Delete(user)
 	if res.Error != nil {
 		return res.Error
 	}
 	if res.RowsAffected == 0 {
-		return utils.ErrFailedDeleteUser
+		return utils.ErrNotFound
 	}
 	return nil
 }

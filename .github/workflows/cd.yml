@@ -1,0 +1,61 @@
+name: Deploy to EC2
+on:
+  push:
+    branches:
+      - "main"
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    environment: Production
+    steps:
+    - uses: actions/checkout@v3
+
+    - uses: actions/setup-go@v3
+      with:
+        go-version: 1.18
+    
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v2
+      
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+    
+    - name: Login to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_PASSWORD }}
+        
+    - name: Build and push
+      uses: docker/build-push-action@v3
+      with:
+        push: true
+        tags: rnwxyz/ci-cd:latest
+    
+    - name: Deploy to EC2 by using SSH
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USERNAME }}
+        key: ${{ secrets.EC2_KEY }}
+        port: ${{ secrets.EC2_PORT }}
+        script: |
+          sudo docker stop kang-sayur
+          sudo docker rm kang-sayur
+          sudo docker pull rnwxyz/kang-sayur:latest
+          sudo docker run -d \
+            -e "DB_ADDRESS=${{ secrets.DB_ADDRESS}}"\"
+            -e "DB_USERNAME=${{ secrets.DB_USERNAME}}"\"
+            -e "DB_PASSWORD=${{ secrets.DB_PASSWORD}}"\"
+            -e "DB_NAME=${{ secrets.DB_NAME}}"\"
+            -e "DEFAULT_ADMIN_EMAIL=${{ secrets.DEFAULT_ADMIN_EMAIL}}"\"
+            -e "DEFAULT_ADMIN_PASSWORD=${{ secrets.DEFAULT_ADMIN_PASSWORD}}"\"
+            -e "API_PORT=${{ secrets.API_PORT}}"\"
+            -e "JWT_SECRET=${{ secrets.JWT_SECRET}}"\"
+            -e "ORDER_SECRET=${{ secrets.ORDER_SECRET}}"\"
+            -e "TIME_LOCATION=${{ secrets.TIME_LOCATION}}"\"
+            -e "MIDTRANS_SERVER_KEY=${{ secrets.MIDTRANS_SERVER_KEY}}"\"
+            -e "DNS=${{ secrets.DNS}}"\"
+          -p 80:80 --name kakng-sayur rnwxyz/kang-sayur:latest

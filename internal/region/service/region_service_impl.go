@@ -190,18 +190,18 @@ func NewRegionService(repository repository.RegionRepository, importCsv importcs
 		importCsv: importCsv,
 	}
 
-	// if err := NewRegionService.importProvince(); err != nil {
-	// 	panic(err)
-	// }
-	// if err := NewRegionService.importRegency(); err != nil {
-	// 	panic(err)
-	// }
-	// if err := NewRegionService.importDistrict(); err != nil {
-	// 	panic(err)
-	// }
-	// if err := NewRegionService.importVillage(); err != nil {
-	// 	panic(err)
-	// }
+	if err := NewRegionService.importProvince(); err != nil {
+		panic(err)
+	}
+	if err := NewRegionService.importRegency(); err != nil {
+		panic(err)
+	}
+	if err := NewRegionService.importDistrict(); err != nil {
+		panic(err)
+	}
+	if err := NewRegionService.importVillage(); err != nil {
+		panic(err)
+	}
 
 	return NewRegionService
 }

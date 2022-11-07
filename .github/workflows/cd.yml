@@ -42,8 +42,8 @@ jobs:
         key: ${{ secrets.EC2_KEY }}
         port: ${{ secrets.EC2_PORT }}
         script: |
-          sudo docker stop kang-sayur
-          sudo docker rm kang-sayur
+          sudo docker stop miniproject
+          sudo docker rm miniproject
           sudo docker pull rnwxyz/kang-sayur:latest
           sudo docker run -d \
             -e "DB_ADDRESS=${{ secrets.DB_ADDRESS }}" \
@@ -58,4 +58,4 @@ jobs:
             -e "TIME_LOCATION=${{ secrets.TIME_LOCATION }}" \
             -e "MIDTRANS_SERVER_KEY=${{ secrets.MIDTRANS_SERVER_KEY }}" \
             -e "DNS=${{ secrets.DNS }}" \
-          -p 80:80 --name kang-sayur rnwxyz/kang-sayur:latest
+          -p 80:80 --name miniproject rnwxyz/kang-sayur:latest

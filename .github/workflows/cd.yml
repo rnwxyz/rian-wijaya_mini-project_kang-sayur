@@ -53,7 +53,7 @@ jobs:
             -e "DEFAULT_ADMIN_EMAIL=${{ secrets.DEFAULT_ADMIN_EMAIL }}" \
             -e "DEFAULT_ADMIN_PASSWORD=${{ secrets.DEFAULT_ADMIN_PASSWORD }}" \
             -e "API_PORT=${{ secrets.API_PORT }}" \
-            -e "JWT_SECRET=${{ secrets.JWT_SECRET }" \
+            -e "JWT_SECRET=${{ secrets.JWT_SECRET }}" \
             -e "ORDER_SECRET=${{ secrets.ORDER_SECRET }}" \
             -e "TIME_LOCATION=${{ secrets.TIME_LOCATION }}" \
             -e "MIDTRANS_SERVER_KEY=${{ secrets.MIDTRANS_SERVER_KEY }}" \

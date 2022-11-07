@@ -17,6 +17,8 @@ type Config struct {
 	JWT_SECRET             string
 	TIME_LOCATION          string
 	ORDER_SECRET           string
+	MIDTRANS_SERVER_KEY    string
+	DNS                    string
 }
 
 var Cfg *Config

@@ -118,6 +118,21 @@ func (r *orderRepositoryImpl) OrderDone(orderId uuid.UUID, ctx context.Context) 
 	return nil
 }
 
+// OrderWaiting implements OrderRepository
+func (r *orderRepositoryImpl) OrderWaiting(orderId uuid.UUID, ctx context.Context) error {
+	order := model.Order{
+		ID: orderId,
+	}
+	res := r.db.WithContext(ctx).Model(&order).Update("status_order_id", constants.Waiting_status_order_id)
+	if res.Error != nil {
+		return res.Error
+	}
+	if res.RowsAffected == 0 {
+		return utils.ErrNotFound
+	}
+	return nil
+}
+
 // InitStatusOrder implements OrderRepository
 func (r *orderRepositoryImpl) InitStatusOrder() error {
 	var status []model.StatusOrder

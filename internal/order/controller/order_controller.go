@@ -48,7 +48,7 @@ func (u *orderController) CreateOrder(c echo.Context) error {
 		return err
 	}
 
-	id, err := u.service.CreateOrder(orderBody, userId, c.Request().Context())
+	newOrder, err := u.service.CreateOrder(orderBody, userId, c.Request().Context())
 	if err != nil {
 		if err == utils.ErrInvalidId || err == utils.ErrQtyOrder || err == utils.ErrBadRequestBody {
 			return c.JSON(http.StatusBadRequest, echo.Map{
@@ -60,7 +60,7 @@ func (u *orderController) CreateOrder(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, echo.Map{
 		"message": "new create order success created",
-		"id":      id,
+		"data":    newOrder,
 	})
 }
 

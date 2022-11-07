@@ -32,7 +32,7 @@ jobs:
       uses: docker/build-push-action@v3
       with:
         push: true
-        tags: rnwxyz/ci-cd:latest
+        tags: rnwxyz/kang-sayur:latest
     
     - name: Deploy to EC2 by using SSH
       uses: appleboy/ssh-action@master
@@ -46,16 +46,16 @@ jobs:
           sudo docker rm kang-sayur
           sudo docker pull rnwxyz/kang-sayur:latest
           sudo docker run -d \
-            -e "DB_ADDRESS=${{ secrets.DB_ADDRESS}}" \
-            -e "DB_USERNAME=${{ secrets.DB_USERNAME}}" \
-            -e "DB_PASSWORD=${{ secrets.DB_PASSWORD}}" \
-            -e "DB_NAME=${{ secrets.DB_NAME}}" \
-            -e "DEFAULT_ADMIN_EMAIL=${{ secrets.DEFAULT_ADMIN_EMAIL}}" \
-            -e "DEFAULT_ADMIN_PASSWORD=${{ secrets.DEFAULT_ADMIN_PASSWORD}}" \
-            -e "API_PORT=${{ secrets.API_PORT}}" \
-            -e "JWT_SECRET=${{ secrets.JWT_SECRET}}" \
-            -e "ORDER_SECRET=${{ secrets.ORDER_SECRET}}" \
-            -e "TIME_LOCATION=${{ secrets.TIME_LOCATION}}" \
-            -e "MIDTRANS_SERVER_KEY=${{ secrets.MIDTRANS_SERVER_KEY}}" \
-            -e "DNS=${{ secrets.DNS}}" \
+            -e "DB_ADDRESS=${{ secrets.DB_ADDRESS }}" \
+            -e "DB_USERNAME=${{ secrets.DB_USERNAME }}" \
+            -e "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" \
+            -e "DB_NAME=${{ secrets.DB_NAME }}" \
+            -e "DEFAULT_ADMIN_EMAIL=${{ secrets.DEFAULT_ADMIN_EMAIL }}" \
+            -e "DEFAULT_ADMIN_PASSWORD=${{ secrets.DEFAULT_ADMIN_PASSWORD }}" \
+            -e "API_PORT=${{ secrets.API_PORT }}" \
+            -e "JWT_SECRET=${{ secrets.JWT_SECRET }" \
+            -e "ORDER_SECRET=${{ secrets.ORDER_SECRET }}" \
+            -e "TIME_LOCATION=${{ secrets.TIME_LOCATION }}" \
+            -e "MIDTRANS_SERVER_KEY=${{ secrets.MIDTRANS_SERVER_KEY }}" \
+            -e "DNS=${{ secrets.DNS }}" \
           -p 80:80 --name kang-sayur rnwxyz/kang-sayur:latest

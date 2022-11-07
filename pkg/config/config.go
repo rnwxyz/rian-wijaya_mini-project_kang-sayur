@@ -1,8 +1,6 @@
 package config
 
-import (
-	"os"
-)
+import "os"
 
 type Config struct {
 	API_PORT               string

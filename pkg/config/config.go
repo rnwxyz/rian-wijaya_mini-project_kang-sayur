@@ -1,7 +1,9 @@
 package config
 
 import (
-	"os"
+	"fmt"
+
+	"github.com/spf13/viper"
 )
 
 type Config struct {
@@ -24,18 +26,27 @@ var Cfg *Config
 func InitConfig() {
 	cfg := &Config{}
 
-	cfg.DB_ADDRESS = os.Getenv("DB_ADDRESS")
-	cfg.API_PORT = os.Getenv("API")
-	cfg.DB_USERNAME = os.Getenv("DB_USERNAME")
-	cfg.DB_PASSWORD = os.Getenv("DB_PASSWORD")
-	cfg.DB_NAME = os.Getenv("DB_NAME")
-	cfg.DEFAULT_ADMIN_EMAIL = os.Getenv("DEFAULT_ADMIN_EMAIL")
-	cfg.DEFAULT_ADMIN_PASSWORD = os.Getenv("DEFAULT_ADMIN_PASSWORD")
-	cfg.JWT_SECRET = os.Getenv("JWT_SECRET")
-	cfg.TIME_LOCATION = os.Getenv("TIME_LOCATION")
-	cfg.ORDER_SECRET = os.Getenv("ORDER_SECRET")
-	cfg.MIDTRANS_SERVER_KEY = os.Getenv("MIDTRANS_SERVER_KEY")
-	cfg.DNS = os.Getenv("DNS")
+	// local development setup
+	viper.SetConfigName(".env")
+	viper.SetConfigType("env")
+	viper.AddConfigPath(".")
+	if err := viper.ReadInConfig(); err != nil {
+		fmt.Println(err)
+	}
+	viper.Unmarshal(cfg)
+
+	// cfg.DB_ADDRESS = os.Getenv("DB_ADDRESS")
+	// cfg.API_PORT = os.Getenv("API")
+	// cfg.DB_USERNAME = os.Getenv("DB_USERNAME")
+	// cfg.DB_PASSWORD = os.Getenv("DB_PASSWORD")
+	// cfg.DB_NAME = os.Getenv("DB_NAME")
+	// cfg.DEFAULT_ADMIN_EMAIL = os.Getenv("DEFAULT_ADMIN_EMAIL")
+	// cfg.DEFAULT_ADMIN_PASSWORD = os.Getenv("DEFAULT_ADMIN_PASSWORD")
+	// cfg.JWT_SECRET = os.Getenv("JWT_SECRET")
+	// cfg.TIME_LOCATION = os.Getenv("TIME_LOCATION")
+	// cfg.ORDER_SECRET = os.Getenv("ORDER_SECRET")
+	// cfg.MIDTRANS_SERVER_KEY = os.Getenv("MIDTRANS_SERVER_KEY")
+	// cfg.DNS = os.Getenv("DNS")
 
 	Cfg = cfg
 }

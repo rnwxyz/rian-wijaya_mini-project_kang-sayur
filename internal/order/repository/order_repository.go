@@ -15,5 +15,6 @@ type OrderRepository interface {
 	CencelOrder(orderId uuid.UUID, ctx context.Context) error
 	OrderReady(orderId uuid.UUID, ctx context.Context) error
 	OrderDone(orderId uuid.UUID, ctx context.Context) error
+	OrderWaiting(orderId uuid.UUID, ctx context.Context) error
 	InitStatusOrder() error
 }

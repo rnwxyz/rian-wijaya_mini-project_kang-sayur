@@ -15,7 +15,7 @@ type Order struct {
 	UpdatedAt     time.Time
 	DeletedAt     gorm.DeletedAt `gorm:"index"`
 	UserID        uuid.UUID      `gorm:"; type:varchar(50)"`
-	User          User           `gorm:"constraint:OnUpdate:NO ACTION,OnDelete:NO ACTION;"`
+	User          User           `gorm:"constraint:OnUpdate:CASCADE,OnDelete:NO ACTION;"`
 	CheckpointID  uuid.UUID
 	Checkpoint    Checkpoint
 	StatusOrderID uint

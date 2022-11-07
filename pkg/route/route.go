@@ -16,12 +16,16 @@ import (
 	pkgRegionController "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/region/controller"
 	pkgRegionRepository "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/region/repository"
 	pkgRegionService "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/region/service"
+	pkgTransactionController "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/transaction/controller"
+	pkgTransactionRepository "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/transaction/repository"
+	pkgTransactionService "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/transaction/service"
 	pkgUserController "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/user/controller"
 	pkgUserRepository "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/user/repository"
 	pkgUserService "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/user/service"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/config"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/constants"
 	importcsv "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/import_csv"
+	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/payment"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils"
 	"gorm.io/gorm"
 )
@@ -67,7 +71,13 @@ func InitGlobalRoute(e *echo.Echo, db *gorm.DB) {
 
 	// init order controller
 	orderRepository := pkgOrderRepository.NewOrderRepository(db)
-	orderService := pkgOrderService.NewOrderService(orderRepository, itemRepository)
+	orderService := pkgOrderService.NewOrderService(orderRepository, itemRepository, payment.Midtrans{})
 	orderController := pkgOrderController.NewOrderController(orderService, jwtService)
 	orderController.InitRoute(auth)
+
+	// init transaction controller
+	transactionRepository := pkgTransactionRepository.NewTransactionRepository(db)
+	transactionService := pkgTransactionService.NewTransactionService(transactionRepository, orderRepository)
+	transactionController := pkgTransactionController.NewTransactionController(transactionService)
+	transactionController.InitRoute(api)
 }

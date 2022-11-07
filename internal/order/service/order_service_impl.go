@@ -13,24 +13,34 @@ import (
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/config"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/constants"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/model"
+	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/payment"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils"
 )
 
 type orderServiceImpl struct {
 	orderRepo or.OrderRepository
 	itemRepo  it.ItemRepository
+	payment   payment.Midtrans
+}
+
+func NewOrderService(orRepository or.OrderRepository, itRepository it.ItemRepository, midtrans payment.Midtrans) OrderService {
+	return &orderServiceImpl{
+		orderRepo: orRepository,
+		itemRepo:  itRepository,
+		payment:   midtrans,
+	}
 }
 
 // CreateOrder implements OrderService
-func (s *orderServiceImpl) CreateOrder(body dto.OrderRequest, userId string, ctx context.Context) (uuid.UUID, error) {
+func (s *orderServiceImpl) CreateOrder(body dto.OrderRequest, userId string, ctx context.Context) (*dto.NewOrder, error) {
 	newId := uuid.New()
 	userIdUUID, err := uuid.Parse(userId)
 	if err != nil {
-		return uuid.Nil, utils.ErrInvalidId
+		return nil, utils.ErrInvalidId
 	}
 	checkpointIdUUID, err := uuid.Parse(body.CheckpointID)
 	if err != nil {
-		return uuid.Nil, utils.ErrInvalidId
+		return nil, utils.ErrInvalidId
 	}
 	totalPrice := 0
 
@@ -40,10 +50,10 @@ func (s *orderServiceImpl) CreateOrder(body dto.OrderRequest, userId string, ctx
 		item.ID = ord.ItemID
 		err := s.itemRepo.FindItemById(&item, ctx)
 		if err != nil {
-			return uuid.Nil, utils.ErrBadRequestBody
+			return nil, utils.ErrBadRequestBody
 		}
 		if item.Qty < ord.Qty || ord.Qty < 1 {
-			return uuid.Nil, utils.ErrQtyOrder
+			return nil, utils.ErrQtyOrder
 		}
 		body.Order[i].Price = item.Price
 		body.Order[i].Total = (ord.Qty * item.Price)
@@ -53,7 +63,7 @@ func (s *orderServiceImpl) CreateOrder(body dto.OrderRequest, userId string, ctx
 	orderDetail := body.Order.ToModel()
 	loc, err := time.LoadLocation(config.Cfg.TIME_LOCATION)
 	if err != nil {
-		return uuid.Nil, err
+		return nil, err
 	}
 
 	newOrder := model.Order{
@@ -69,9 +79,14 @@ func (s *orderServiceImpl) CreateOrder(body dto.OrderRequest, userId string, ctx
 	}
 	err = s.orderRepo.CreateOrder(&newOrder, ctx)
 	if err != nil {
-		return uuid.Nil, err
+		return nil, err
 	}
-	return newId, nil
+	transaction := s.payment.NewTransaction(newOrder)
+	newOrderResponse := dto.NewOrder{
+		OrderID:     newId,
+		RedirectURL: transaction,
+	}
+	return &newOrderResponse, nil
 }
 
 // FindOrder implements OrderService
@@ -174,11 +189,4 @@ func (s *orderServiceImpl) CencelOder(orderId string, ctx context.Context) error
 	}
 	err = s.orderRepo.CencelOrder(id, ctx)
 	return err
-}
-
-func NewOrderService(orRepository or.OrderRepository, itRepository it.ItemRepository) OrderService {
-	return &orderServiceImpl{
-		orderRepo: orRepository,
-		itemRepo:  itRepository,
-	}
 }

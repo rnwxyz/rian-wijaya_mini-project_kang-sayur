@@ -16,4 +16,5 @@ var (
 	ErrTimeLocation                 = errors.New("time location error")
 	ErrQtyOrder                     = errors.New("order qty exceeds stock or less that 1")
 	ErrOrderCode                    = errors.New("invalid order code")
+	ErrCheckpointNotCovered         = errors.New("not found checkpoint in your location")
 )

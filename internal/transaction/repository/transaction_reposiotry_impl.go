@@ -27,7 +27,9 @@ func (r *transactionRepositoryImpl) CreateTransaction(transaction *model.Transac
 
 // CreateTransaction implements TransactionRepository
 func (r *transactionRepositoryImpl) UpdateTransaction(transaction *model.Transaction, ctx context.Context) error {
-	err := r.db.WithContext(ctx).Save(transaction).Error
+	err := r.db.WithContext(ctx).Model(&model.Transaction{}).Where("id = ?", transaction.ID).Updates(&model.Transaction{
+		TransactionStatus: transaction.TransactionStatus,
+	}).Error
 	if err != nil {
 		if strings.Contains(err.Error(), "Cannot add or update a child row") {
 			return utils.ErrBadRequestBody
@@ -38,9 +40,9 @@ func (r *transactionRepositoryImpl) UpdateTransaction(transaction *model.Transac
 }
 
 // FindAllTransaction implements TransactionRepository
-func (r *transactionRepositoryImpl) FindAllTransaction(ctx context.Context) ([]model.Transaction, error) {
+func (r *transactionRepositoryImpl) FindAllTransaction(userid string, ctx context.Context) ([]model.Transaction, error) {
 	var transactions []model.Transaction
-	err := r.db.WithContext(ctx).Find(&transactions).Error
+	err := r.db.WithContext(ctx).Model(&model.Transaction{}).Joins("left join orders on orders.id = transactions.order_id").Where("orders.user_id = ?", userid).Find(&transactions).Error
 	if err != nil {
 		return nil, err
 	}

@@ -7,11 +7,62 @@ import (
 	"github.com/google/uuid"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/checkpoint/dto"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/checkpoint/repository"
+	urp "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/user/repository"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils"
 )
 
 type checkpointServiceImpl struct {
-	repo repository.CheckpointRepository
+	repo     repository.CheckpointRepository
+	userRepo urp.UserRepository
+}
+
+// FindCheckpointsByUser implements CheckpointService
+func (s *checkpointServiceImpl) FindCheckpointsByUser(id string, ctx context.Context) (dto.CheckpointsResponse, error) {
+	_, err := uuid.Parse(id)
+	if err != nil {
+		return nil, utils.ErrInvalidId
+	}
+	user, _ := s.userRepo.FindUserByID(id, ctx)
+	var checkpointsResponse dto.CheckpointsResponse
+
+	checkpoints1, err := s.repo.FindCheckpointByVilage(*user, ctx)
+	if err != nil {
+		return nil, err
+	}
+	if len(checkpoints1) != 0 {
+		checkpointsResponse.FromModel(checkpoints1)
+		return checkpointsResponse, nil
+	}
+
+	checkpoints2, err := s.repo.FindCheckpointByDistrict(*user, ctx)
+	if err != nil {
+		return nil, err
+	}
+	if len(checkpoints2) != 0 {
+		checkpointsResponse.FromModel(checkpoints2)
+		return checkpointsResponse, nil
+	}
+
+	checkpoints3, err := s.repo.FindCheckpointByRegency(*user, ctx)
+	if err != nil {
+		return nil, err
+	}
+	if len(checkpoints3) != 0 {
+		checkpointsResponse.FromModel(checkpoints3)
+		return checkpointsResponse, nil
+	}
+
+	checkpoints4, err := s.repo.FindCheckpointByProvince(*user, ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(checkpoints4) != 0 {
+		checkpointsResponse.FromModel(checkpoints4)
+		return checkpointsResponse, nil
+	}
+
+	return nil, utils.ErrCheckpointNotCovered
 }
 
 // CreateCheckpoint implements CheckpointService
@@ -50,8 +101,9 @@ func (s *checkpointServiceImpl) UpdateCheckpoint(id string, body dto.CheckpointR
 	panic("unimplemented")
 }
 
-func NewCheckpointService(repository repository.CheckpointRepository) CheckpointService {
+func NewCheckpointService(repository repository.CheckpointRepository, userRepo urp.UserRepository) CheckpointService {
 	return &checkpointServiceImpl{
-		repo: repository,
+		repo:     repository,
+		userRepo: userRepo,
 	}
 }

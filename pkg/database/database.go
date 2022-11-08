@@ -27,5 +27,6 @@ func MigrateDB(db *gorm.DB) error {
 		model.Item{},
 		model.Order{},
 		model.OrderDetail{},
+		model.Transaction{},
 	)
 }

@@ -78,6 +78,6 @@ func InitGlobalRoute(e *echo.Echo, db *gorm.DB) {
 	// init transaction controller
 	transactionRepository := pkgTransactionRepository.NewTransactionRepository(db)
 	transactionService := pkgTransactionService.NewTransactionService(transactionRepository, orderRepository)
-	transactionController := pkgTransactionController.NewTransactionController(transactionService)
-	transactionController.InitRoute(v1)
+	transactionController := pkgTransactionController.NewTransactionController(transactionService, jwtService)
+	transactionController.InitRoute(v1, auth)
 }

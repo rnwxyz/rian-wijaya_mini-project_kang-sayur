@@ -9,4 +9,5 @@ import (
 type TransactionService interface {
 	CreateTransaction(body dto.TransactionRequest, ctx context.Context) error
 	SetOrderStatus(body dto.TransactionRequest, ctx context.Context) error
+	FindTransaction(id string, ctx context.Context) (dto.TransactionsResponse, error)
 }

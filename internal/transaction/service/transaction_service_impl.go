@@ -15,6 +15,17 @@ type transactionServiceImpl struct {
 	orderRepo       or.OrderRepository
 }
 
+// FindTransaction implements TransactionService
+func (s *transactionServiceImpl) FindTransaction(id string, ctx context.Context) (dto.TransactionsResponse, error) {
+	transactions, err := s.transactionRepo.FindAllTransaction(id, ctx)
+	if err != nil {
+		return nil, err
+	}
+	var transactionsResponse dto.TransactionsResponse
+	transactionsResponse.FromModel(transactions)
+	return transactionsResponse, nil
+}
+
 // CreateTransaction implements TransactionService
 func (s *transactionServiceImpl) CreateTransaction(body dto.TransactionRequest, ctx context.Context) error {
 	model := body.ToModel()
@@ -26,7 +37,8 @@ func (s *transactionServiceImpl) CreateTransaction(body dto.TransactionRequest, 
 		}
 		return err
 	}
-	err = s.transactionRepo.UpdateTransaction(model, ctx)
+	makeTransaction := body.ToModel()
+	err = s.transactionRepo.UpdateTransaction(makeTransaction, ctx)
 	if err != nil {
 		return err
 	}

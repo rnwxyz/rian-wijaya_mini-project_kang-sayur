@@ -43,7 +43,7 @@ func (r *orderRepositoryImpl) FindOrder(userId uuid.UUID, ctx context.Context) (
 
 // FindOrderDetail implements OrderRepository
 func (r *orderRepositoryImpl) FindOrderDetail(order *model.Order, ctx context.Context) error {
-	err := r.db.WithContext(ctx).Where("user_id = ? AND id = ?", order.UserID, order.ID).Preload("OrderDetail").Preload("StatusOrder").Preload("Checkpoint").Find(&order).Error
+	err := r.db.WithContext(ctx).Where("user_id = ? AND id = ?", order.UserID, order.ID).Preload("OrderDetail.Item").Preload("OrderDetail").Preload("StatusOrder").Preload("Checkpoint").Find(&order).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return utils.ErrNotFound

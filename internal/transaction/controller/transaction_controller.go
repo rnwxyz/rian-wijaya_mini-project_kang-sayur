@@ -6,7 +6,6 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/transaction/dto"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/transaction/service"
-	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils"
 )
 
 type transactionController struct {
@@ -28,7 +27,7 @@ func (u *transactionController) TransactionNotification(c echo.Context) error {
 
 	if err := c.Bind(&transactionBody); err != nil {
 		return c.JSON(http.StatusBadRequest, echo.Map{
-			"message": utils.ErrBadRequestBody.Error()})
+			"message": err.Error()})
 	}
 
 	err := u.service.CreateTransaction(transactionBody, c.Request().Context())

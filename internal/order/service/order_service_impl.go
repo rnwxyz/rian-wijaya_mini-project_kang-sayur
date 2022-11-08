@@ -10,6 +10,7 @@ import (
 	it "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/item/repository"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/order/dto"
 	or "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/order/repository"
+	urp "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/user/repository"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/constants"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/model"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/payment"
@@ -20,13 +21,15 @@ type orderServiceImpl struct {
 	orderRepo or.OrderRepository
 	itemRepo  it.ItemRepository
 	payment   payment.Midtrans
+	userRepo  urp.UserRepository
 }
 
-func NewOrderService(orRepository or.OrderRepository, itRepository it.ItemRepository, midtrans payment.Midtrans) OrderService {
+func NewOrderService(orRepository or.OrderRepository, itRepository it.ItemRepository, midtrans payment.Midtrans, userRepo urp.UserRepository) OrderService {
 	return &orderServiceImpl{
 		orderRepo: orRepository,
 		itemRepo:  itRepository,
 		payment:   midtrans,
+		userRepo:  userRepo,
 	}
 }
 
@@ -72,11 +75,15 @@ func (s *orderServiceImpl) CreateOrder(body dto.OrderRequest, userId string, ctx
 		OrderDetail:   *orderDetail,
 		ExpiredOrder:  time.Now().Add(constants.ExpOrder),
 	}
+
 	err = s.orderRepo.CreateOrder(&newOrder, ctx)
 	if err != nil {
 		return nil, err
 	}
-	transaction := s.payment.NewTransaction(newOrder)
+
+	user, _ := s.userRepo.FindUserByID(userId, ctx)
+
+	transaction := s.payment.NewTransaction(newOrder, *user)
 	newOrderResponse := dto.NewOrder{
 		OrderID:     newId,
 		RedirectURL: transaction,

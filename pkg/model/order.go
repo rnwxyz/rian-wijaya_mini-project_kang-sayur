@@ -77,8 +77,7 @@ func (u *Order) AfterUpdate(tx *gorm.DB) (err error) {
 		if err != nil {
 			panic(err)
 		}
-		zeroTime := time.Date(int(1), time.January, int(1), int(0), int(0), int(0), int(0), nil)
-		tx.Model(&Order{}).Where("id = ?", u.ID).Update("expired_time", zeroTime)
+		tx.Model(&Order{}).Where("id = ?", u.ID).Update("expired_time", time.Now())
 	} else if u.StatusOrderID == 3 { // order ready generate code
 		var order Order
 		tx.Model(&Order{}).Where("id = ?", u.ID).First(&order)

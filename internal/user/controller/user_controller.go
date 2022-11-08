@@ -29,8 +29,8 @@ func NewUserController(service service.UserService, jwt JWTService) *userControl
 func (u *userController) InitRoute(api *echo.Group, auth *echo.Group) {
 	api.POST("/signup", u.SignUp)
 	api.POST("/login", u.Login)
-	auth.GET("/user", u.GetUsers)
-	auth.GET("/user/:id", u.GetUser)
+	auth.GET("/user/all", u.GetUsers)
+	auth.GET("/user", u.GetUser)
 	auth.PUT("/user/:id", u.UpdateUser)
 	auth.DELETE("/user/:id", u.DeleteUser)
 }
@@ -95,13 +95,7 @@ func (u *userController) Login(c echo.Context) error {
 func (u *userController) GetUser(c echo.Context) error {
 	claims := u.jwtService.GetClaims(&c)
 	userId := claims["user_id"].(string)
-	paramId := c.Param("id")
-	if userId != paramId {
-		return c.JSON(http.StatusForbidden, echo.Map{
-			"message": utils.ErrPermission.Error(),
-		})
-	}
-	user, err := u.service.FindUser(paramId, c.Request().Context())
+	user, err := u.service.FindUser(userId, c.Request().Context())
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, echo.Map{
 			"message": err.Error(),

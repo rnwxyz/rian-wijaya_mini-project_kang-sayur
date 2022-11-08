@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/config"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/constants"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/model"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils"
@@ -99,12 +98,8 @@ func (r *orderRepositoryImpl) OrderDone(orderId uuid.UUID, ctx context.Context) 
 	order := model.Order{
 		ID: orderId,
 	}
-	loc, err := time.LoadLocation(config.Cfg.TIME_LOCATION)
-	if err != nil {
-		return utils.ErrTimeLocation
-	}
 	// set zero
-	zeroTime := time.Date(int(1), time.January, int(1), int(0), int(0), int(0), int(0), loc)
+	zeroTime := time.Date(int(1), time.January, int(1), int(0), int(0), int(0), int(0), nil)
 	res := r.db.WithContext(ctx).Model(&order).Updates(&model.Order{
 		StatusOrderID: constants.Success_status_order_id,
 		ExpiredOrder:  zeroTime,

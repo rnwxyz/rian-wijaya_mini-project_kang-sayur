@@ -55,7 +55,7 @@ func (u *userRepositoryImpl) FindUserByID(id string, ctx context.Context) (*mode
 // FindAllUsers implements UserRepository
 func (u *userRepositoryImpl) FindAllUsers(ctx context.Context) ([]model.User, error) {
 	var users []model.User
-	err := u.db.WithContext(ctx).Preload("Province").Preload("Regency").Preload("District").Preload("Village").Find(&users).Error
+	err := u.db.WithContext(ctx).Where("role_id = ?", constants.Role_user).Preload("Province").Preload("Regency").Preload("District").Preload("Village").Find(&users).Error
 	return users, err
 }
 

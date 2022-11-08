@@ -7,6 +7,7 @@ RUN CGO_ENABLED=1 GOOS=linux go build -tags netgo -o main.app ./app
 
 FROM alpine:latest
 
+COPY --from=builder /app/pkg/import_csv/file_csv /app/pkg/import_csv/file_csv
 COPY --from=builder /app/main.app .
 
 CMD ["./main.app"]

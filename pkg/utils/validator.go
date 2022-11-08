@@ -1,11 +1,10 @@
 package utils
 
 import (
+	"errors"
 	"fmt"
-	"net/http"
 
 	"github.com/go-playground/validator"
-	"github.com/labstack/echo/v4"
 )
 
 type CustomValidator struct {
@@ -20,16 +19,16 @@ func (cv *CustomValidator) Validate(i interface{}) error {
 			switch each.Tag() {
 			case "required":
 				msg := fmt.Sprintf("%s is required", each.Field())
-				return echo.NewHTTPError(http.StatusBadRequest, msg)
+				return errors.New(msg)
 			case "len":
 				msg := fmt.Sprintf("%s must be %s characters long", each.Field(), each.Param())
-				return echo.NewHTTPError(http.StatusBadRequest, msg)
+				return errors.New(msg)
 			case "gte":
 				msg := fmt.Sprintf("%s must be greater than or equal to %s", each.Field(), each.Param())
-				return echo.NewHTTPError(http.StatusBadRequest, msg)
+				return errors.New(msg)
 			default:
 				msg := fmt.Sprintf("Invalid field %s", each.Field())
-				return echo.NewHTTPError(http.StatusBadRequest, msg)
+				return errors.New(msg)
 			}
 		}
 	}

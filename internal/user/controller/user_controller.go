@@ -10,15 +10,14 @@ import (
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils"
 )
 
-type (
-	JWTService interface {
-		GetClaims(c *echo.Context) jwt.MapClaims
-	}
-	userController struct {
-		service    service.UserService
-		jwtService JWTService
-	}
-)
+type JWTService interface {
+	GetClaims(c *echo.Context) jwt.MapClaims
+}
+
+type userController struct {
+	service    service.UserService
+	jwtService JWTService
+}
 
 func NewUserController(service service.UserService, jwt JWTService) *userController {
 	return &userController{
@@ -43,7 +42,9 @@ func (u *userController) SignUp(c echo.Context) error {
 			"message": utils.ErrBadRequestBody.Error()})
 	}
 	if err := c.Validate(user); err != nil {
-		return err
+		return c.JSON(http.StatusBadRequest, echo.Map{
+			"message": err.Error(),
+		})
 	}
 	id, err := u.service.CreateUser(user, c.Request().Context())
 	if err != nil {
@@ -70,7 +71,9 @@ func (u *userController) Login(c echo.Context) error {
 		})
 	}
 	if err := c.Validate(user); err != nil {
-		return err
+		return c.JSON(http.StatusBadRequest, echo.Map{
+			"message": err.Error(),
+		})
 	}
 	token, err := u.service.Login(user, c.Request().Context())
 	if err != nil {
@@ -143,9 +146,6 @@ func (u *userController) UpdateUser(c echo.Context) error {
 	if err := c.Bind(&user); err != nil {
 		return c.JSON(http.StatusBadRequest, echo.Map{
 			"message": utils.ErrBadRequestBody.Error()})
-	}
-	if err := c.Validate(user); err != nil {
-		return err
 	}
 	err := u.service.UpdateUser(paramId, user, c.Request().Context())
 	if err != nil {

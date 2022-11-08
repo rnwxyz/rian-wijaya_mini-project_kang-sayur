@@ -95,8 +95,9 @@ func (s *suiteUserService) TestCreateUser() {
 			create := s.userRepositoryMock.On("CreateUser").Return(v.mockReturn["createUser"])
 			var ctx context.Context
 			res, err := s.userService.CreateUser(v.Body, ctx)
+
 			s.Equal(v.ExpectedErr, err)
-			s.Equal(len(v.ExpectedResult), len(res))
+			s.Equal(len(v.ExpectedResult.String()), len(res.String()))
 
 			hash.Unset()
 			create.Unset()
@@ -229,7 +230,7 @@ func (s *suiteUserService) TestFindUser() {
 			var ctx context.Context
 			res, err := s.userService.FindUser(v.Body, ctx)
 			s.Equal(v.ExpectedErr, err)
-			s.Equal(len(v.ExpectedResult.ID), len(res.ID))
+			s.Equal(len(v.ExpectedResult.ID.String()), len(res.ID.String()))
 
 			fbi.Unset()
 		})

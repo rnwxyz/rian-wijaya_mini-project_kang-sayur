@@ -98,7 +98,7 @@ func (u *Order) AfterUpdate(tx *gorm.DB) (err error) {
 		if err != nil {
 			panic(err)
 		}
-		tx.Model(&Order{}).Where("id = ?", u.ID).Update("expired_time", time.Now().Add(12*time.Hour))
+		tx.Model(&Order{}).Where("id = ?", u.ID).Update("expired_order", time.Now().Add(12*time.Hour))
 	}
 	return
 }

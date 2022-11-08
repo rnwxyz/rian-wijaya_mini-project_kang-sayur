@@ -191,6 +191,9 @@ func (s *suiteUserService) TestLogin() {
 	}
 }
 func (s *suiteUserService) TestFindUser() {
+	// uuid statis
+	varUUID := uuid.New()
+
 	testCase := []struct {
 		Name            string
 		Body            string
@@ -201,10 +204,10 @@ func (s *suiteUserService) TestFindUser() {
 	}{
 		{
 			Name:            "success",
-			Body:            uuid.New().String(),
+			Body:            varUUID.String(),
 			ExpectedErr:     nil,
-			ExpectedResult:  &dto.UserResponse{ID: uuid.New()},
-			FindUserByIdRes: &model.User{ID: uuid.New()},
+			ExpectedResult:  &dto.UserResponse{ID: varUUID},
+			FindUserByIdRes: &model.User{ID: varUUID},
 			FindUserByIdErr: nil,
 		},
 		{
@@ -230,7 +233,7 @@ func (s *suiteUserService) TestFindUser() {
 			var ctx context.Context
 			res, err := s.userService.FindUser(v.Body, ctx)
 			s.Equal(v.ExpectedErr, err)
-			s.Equal(len(v.ExpectedResult.ID.String()), len(res.ID.String()))
+			s.Equal(v.ExpectedResult, res)
 
 			fbi.Unset()
 		})

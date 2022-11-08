@@ -19,13 +19,12 @@ func (u *UserSignup) ToModel() *model.User {
 }
 
 type UserUpdate struct {
-	ID         uuid.UUID `json:"id"`
-	Name       string    `json:"name"`
-	Phone      string    `json:"phone"`
-	ProvinceID uint      `json:"province_id"`
-	RegencyID  uint      `json:"regency_id"`
-	DistrictID uint      `json:"district_id"`
-	VillageID  uint      `json:"village_id"`
+	Name       string `json:"name"`
+	Phone      string `json:"phone"`
+	ProvinceID uint   `json:"province_id"`
+	RegencyID  uint   `json:"regency_id"`
+	DistrictID uint   `json:"district_id"`
+	VillageID  uint   `json:"village_id"`
 }
 
 func (u *UserUpdate) ToModel() *model.User {

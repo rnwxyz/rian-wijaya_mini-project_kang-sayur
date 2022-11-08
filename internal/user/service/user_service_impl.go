@@ -6,26 +6,24 @@ import (
 	"github.com/google/uuid"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/user/dto"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/user/repository"
-	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/config"
+	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/constants"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/model"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils"
 )
 
-type (
-	PasswordHashFunction interface {
-		HashPassword(password string) (string, error)
-		CheckPasswordHash(password, hash string) bool
-	}
+type PasswordHashFunction interface {
+	HashPassword(password string) (string, error)
+	CheckPasswordHash(password, hash string) bool
+}
 
-	JWTService interface {
-		GenerateToken(user *model.User) (string, error)
-	}
-	userServiceImpl struct {
-		repo       repository.UserRepository
-		password   utils.Password
-		jwtService JWTService
-	}
-)
+type JWTService interface {
+	GenerateToken(user *model.User) (string, error)
+}
+type userServiceImpl struct {
+	repo       repository.UserRepository
+	password   PasswordHashFunction
+	jwtService JWTService
+}
 
 // Login implements UserService
 func (u *userServiceImpl) Login(user dto.LoginRequest, ctx context.Context) (string, error) {
@@ -53,14 +51,14 @@ func (u *userServiceImpl) CreateDefaultAdmin() error {
 	if len(users) >= 1 {
 		return nil
 	}
-	hashPassword, err := u.password.HashPassword(config.Cfg.DEFAULT_ADMIN_PASSWORD)
+	hashPassword, err := u.password.HashPassword(constants.Default_password_admin)
 	if err != nil {
 		return err
 	}
 	admin := model.User{
 		ID:       uuid.New(),
 		Name:     "admin",
-		Email:    config.Cfg.DEFAULT_ADMIN_EMAIL,
+		Email:    constants.Default_email_admin,
 		Password: hashPassword,
 		RoleID:   3,
 	}
@@ -99,6 +97,10 @@ func (u *userServiceImpl) FindAllUsers(ctx context.Context) (dto.UsersResponse, 
 
 // FindUser implements UserService
 func (u *userServiceImpl) FindUser(id string, ctx context.Context) (*dto.UserResponse, error) {
+	_, err := uuid.Parse(id)
+	if err != nil {
+		return nil, utils.ErrInvalidId
+	}
 	user, err := u.repo.FindUserByID(id, ctx)
 	if err != nil {
 		return nil, err
@@ -133,7 +135,7 @@ func (u *userServiceImpl) DeleteUser(id string, ctx context.Context) error {
 	return err
 }
 
-func NewUserService(repository repository.UserRepository, password utils.Password, jwt JWTService) UserService {
+func NewUserService(repository repository.UserRepository, password PasswordHashFunction, jwt JWTService) UserService {
 	userService := &userServiceImpl{
 		repo:       repository,
 		password:   password,

@@ -71,7 +71,7 @@ func InitGlobalRoute(e *echo.Echo, db *gorm.DB) {
 
 	// init order controller
 	orderRepository := pkgOrderRepository.NewOrderRepository(db)
-	orderService := pkgOrderService.NewOrderService(orderRepository, itemRepository, payment.Midtrans{})
+	orderService := pkgOrderService.NewOrderService(orderRepository, itemRepository, payment.Midtrans{}, userRepository)
 	orderController := pkgOrderController.NewOrderController(orderService, jwtService)
 	orderController.InitRoute(auth)
 
@@ -79,5 +79,5 @@ func InitGlobalRoute(e *echo.Echo, db *gorm.DB) {
 	transactionRepository := pkgTransactionRepository.NewTransactionRepository(db)
 	transactionService := pkgTransactionService.NewTransactionService(transactionRepository, orderRepository)
 	transactionController := pkgTransactionController.NewTransactionController(transactionService)
-	transactionController.InitRoute(api)
+	transactionController.InitRoute(v1)
 }

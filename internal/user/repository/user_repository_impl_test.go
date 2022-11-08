@@ -213,7 +213,7 @@ func (s *suiteUserRepository) TestFindAllUser() {
 	row := sqlmock.NewRows([]string{"email"}).AddRow("test@gmail.com")
 	for _, v := range testCase {
 		s.T().Run(v.Name, func(t *testing.T) {
-			db := s.mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `users` WHERE `users`.`deleted_at` IS NULL"))
+			db := s.mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `users` WHERE role_id = ? AND `users`.`deleted_at` IS NULL"))
 			if v.ExpectedErr != nil {
 				db.WillReturnError(v.MockReturn)
 			} else {

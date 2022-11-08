@@ -326,18 +326,6 @@ func (s *suiteUserController) TestGetUser() {
 			},
 		},
 		{
-			Name: "forbidden",
-			JwtRes: jwt.MapClaims{
-				"user_id": uuid.New().String(),
-			},
-			ExpectedStatus: 403,
-			FindUserRes:    nil,
-			FindUserErr:    nil,
-			ExpectedResult: map[string]interface{}{
-				"message": utils.ErrPermission.Error(),
-			},
-		},
-		{
 			Name: "internal server error",
 			JwtRes: jwt.MapClaims{
 				"user_id": varUUID.String(),
@@ -358,9 +346,7 @@ func (s *suiteUserController) TestGetUser() {
 			w := httptest.NewRecorder()
 
 			ctx := s.echoNew.NewContext(r, w)
-			ctx.SetPath("/user/:id")
-			ctx.SetParamNames("id")
-			ctx.SetParamValues(varUUID.String())
+			ctx.SetPath("/user")
 
 			//define mock
 			mock1 := s.userServiceMock.On("FindUser").Return(v.FindUserRes, v.FindUserErr)
@@ -454,9 +440,7 @@ func (s *suiteUserController) TestGetAllUsers() {
 			w := httptest.NewRecorder()
 
 			ctx := s.echoNew.NewContext(r, w)
-			ctx.SetPath("/user/:id")
-			ctx.SetParamNames("id")
-			ctx.SetParamValues(varUUID.String())
+			ctx.SetPath("/user/all")
 
 			//define mock
 			mock1 := s.userServiceMock.On("FindAllUsers").Return(v.FindAllUsersRes, v.FindAllUsersErr)

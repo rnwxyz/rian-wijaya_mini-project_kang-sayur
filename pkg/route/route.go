@@ -59,7 +59,7 @@ func InitGlobalRoute(e *echo.Echo, db *gorm.DB) {
 
 	// init checkpoint controller
 	checkpointRepository := pkgCheckpointRepository.NewCheckpointRepository(db)
-	checkpointService := pkgCheckpointService.NewCheckpointService(checkpointRepository)
+	checkpointService := pkgCheckpointService.NewCheckpointService(checkpointRepository, userRepository)
 	checkpointController := pkgCheckpointController.NewCheckpointController(checkpointService, jwtService)
 	checkpointController.InitRoute(auth)
 

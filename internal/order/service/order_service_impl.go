@@ -10,7 +10,6 @@ import (
 	it "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/item/repository"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/order/dto"
 	or "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/order/repository"
-	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/config"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/constants"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/model"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/payment"
@@ -61,10 +60,6 @@ func (s *orderServiceImpl) CreateOrder(body dto.OrderRequest, userId string, ctx
 	}
 
 	orderDetail := body.Order.ToModel()
-	loc, err := time.LoadLocation(config.Cfg.TIME_LOCATION)
-	if err != nil {
-		return nil, err
-	}
 
 	newOrder := model.Order{
 		ID:            newId,
@@ -75,7 +70,7 @@ func (s *orderServiceImpl) CreateOrder(body dto.OrderRequest, userId string, ctx
 		TotalPrice:    totalPrice,
 		GrandTotal:    totalPrice + constants.Shipping_cost,
 		OrderDetail:   *orderDetail,
-		ExpiredOrder:  time.Now().In(loc).Add(constants.ExpOrder),
+		ExpiredOrder:  time.Now().Add(constants.ExpOrder),
 	}
 	err = s.orderRepo.CreateOrder(&newOrder, ctx)
 	if err != nil {

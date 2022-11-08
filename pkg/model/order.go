@@ -74,11 +74,10 @@ func (u *Order) AfterUpdate(tx *gorm.DB) (err error) {
 			newQty := item.Qty + ord.Qty
 			tx.Model(&Item{}).Where("id = ?", ord.ItemID).Update("qty", newQty)
 		}
-		loc, _ := time.LoadLocation("Asia/Makassar")
 		if err != nil {
 			panic(err)
 		}
-		zeroTime := time.Date(int(1), time.January, int(1), int(0), int(0), int(0), int(0), loc)
+		zeroTime := time.Date(int(1), time.January, int(1), int(0), int(0), int(0), int(0), nil)
 		tx.Model(&Order{}).Where("id = ?", u.ID).Update("expired_time", zeroTime)
 	} else if u.StatusOrderID == 3 { // order ready generate code
 		var order Order
@@ -96,11 +95,10 @@ func (u *Order) AfterUpdate(tx *gorm.DB) (err error) {
 		}
 		tx.Model(&Order{}).Where("id = ?", u.ID).Update("hash", str)
 		tx.Model(&Order{}).Where("id = ?", u.ID).Update("code", rand)
-		loc, err := time.LoadLocation("Asia/Makassar")
 		if err != nil {
 			panic(err)
 		}
-		tx.Model(&Order{}).Where("id = ?", u.ID).Update("expired_time", time.Now().In(loc).Add(12*time.Hour))
+		tx.Model(&Order{}).Where("id = ?", u.ID).Update("expired_time", time.Now().Add(12*time.Hour))
 	}
 	return
 }

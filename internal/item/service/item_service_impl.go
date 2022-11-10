@@ -33,16 +33,6 @@ func (s *itemServiceImpl) CreateItem(body dto.ItemRequest, ctx context.Context) 
 	return item.ID, err
 }
 
-// DeleteCategory implements ItemService
-func (s *itemServiceImpl) DeleteCategory(id string, ctx context.Context) error {
-	panic("unimplemented")
-}
-
-// DeleteItem implements ItemService
-func (s *itemServiceImpl) DeleteItem(id string, ctx context.Context) error {
-	panic("unimplemented")
-}
-
 // FindCategories implements ItemService
 func (s *itemServiceImpl) FindCategories(ctx context.Context) (dto.CategoriesResponse, error) {
 	categories, err := s.repo.FindCategories(ctx)
@@ -52,11 +42,6 @@ func (s *itemServiceImpl) FindCategories(ctx context.Context) (dto.CategoriesRes
 	var categoriesResponse dto.CategoriesResponse
 	categoriesResponse.FromModel(categories)
 	return categoriesResponse, nil
-}
-
-// FindItem implements ItemService
-func (s *itemServiceImpl) FindItem(id string, ctx context.Context) (*dto.ItemResponse, error) {
-	panic("unimplemented")
 }
 
 // FindItemByCategory implements ItemService
@@ -83,11 +68,6 @@ func (s *itemServiceImpl) FindItems(ctx context.Context) (dto.ItemsResponse, err
 	var itemsResponse dto.ItemsResponse
 	itemsResponse.FromModel(items)
 	return itemsResponse, nil
-}
-
-// UpdateCategory implements ItemService
-func (s *itemServiceImpl) UpdateCategory(id string, body dto.CategoryRequest, ctx context.Context) error {
-	panic("unimplemented")
 }
 
 // UpdateItem implements ItemService

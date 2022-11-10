@@ -80,11 +80,6 @@ func (s *checkpointServiceImpl) CreateCheckpoint(body dto.CheckpointRequest, ctx
 	return newId, err
 }
 
-// DeleteCheckpoint implements CheckpointService
-func (s *checkpointServiceImpl) DeleteCheckpoint(id string, ctx context.Context) error {
-	panic("unimplemented")
-}
-
 // FindCheckpoints implements CheckpointService
 func (s *checkpointServiceImpl) FindCheckpoints(ctx context.Context) (dto.CheckpointsResponse, error) {
 	checkpoints, err := s.repo.FindCheckpoints(ctx)
@@ -94,11 +89,6 @@ func (s *checkpointServiceImpl) FindCheckpoints(ctx context.Context) (dto.Checkp
 	var checkpointsResponse dto.CheckpointsResponse
 	checkpointsResponse.FromModel(checkpoints)
 	return checkpointsResponse, nil
-}
-
-// UpdateCheckpoint implements CheckpointService
-func (s *checkpointServiceImpl) UpdateCheckpoint(id string, body dto.CheckpointRequest, ctx context.Context) error {
-	panic("unimplemented")
 }
 
 func NewCheckpointService(repository repository.CheckpointRepository, userRepo urp.UserRepository) CheckpointService {

@@ -40,11 +40,6 @@ func (r *itemRepositoryImpl) CreateItem(item *model.Item, ctx context.Context) e
 	return nil
 }
 
-// DeleteItem implements ItemRepository
-func (r *itemRepositoryImpl) DeleteItem(item *model.Item, ctx context.Context) error {
-	panic("unimplemented")
-}
-
 // FindCategories implements ItemRepository
 func (r *itemRepositoryImpl) FindCategories(ctx context.Context) ([]model.Category, error) {
 	var categories []model.Category

@@ -98,11 +98,10 @@ func (r *orderRepositoryImpl) OrderDone(orderId uuid.UUID, ctx context.Context) 
 	order := model.Order{
 		ID: orderId,
 	}
-	// set zero
-	zeroTime := time.Date(int(1), time.January, int(1), int(0), int(0), int(0), int(0), nil)
+  
 	res := r.db.WithContext(ctx).Model(&order).Updates(&model.Order{
 		StatusOrderID: constants.Success_status_order_id,
-		ExpiredOrder:  zeroTime,
+		ExpiredOrder:  time.Now(),
 	})
 	if res.Error != nil {
 		return res.Error

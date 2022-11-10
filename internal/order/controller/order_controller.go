@@ -15,15 +15,21 @@ type JWTService interface {
 	GetClaims(c *echo.Context) jwt.MapClaims
 }
 
+type QRCode interface {
+	GenerateQRCode(hashCode string) ([]byte, error)
+}
+
 type orderController struct {
 	service    service.OrderService
 	jwtService JWTService
+	qrCode     QRCode
 }
 
-func NewOrderController(service service.OrderService, jwt JWTService) *orderController {
+func NewOrderController(service service.OrderService, jwt JWTService, qr QRCode) *orderController {
 	return &orderController{
 		service:    service,
 		jwtService: jwt,
+		qrCode:     qr,
 	}
 }
 
@@ -32,6 +38,7 @@ func (u *orderController) InitRoute(auth *echo.Group) {
 	orders.POST("", u.CreateOrder)
 	orders.GET("", u.GetOrder)
 	orders.GET("/:id", u.GetOrderDetail)
+	orders.GET("/qr/:hash_code", u.GetQRCode)
 	orders.POST("/takeorder", u.TakeOrder)
 	orders.PUT("/cencel/:id", u.CencelOrder)
 	orders.PUT("/ready/:id", u.OrderReady)
@@ -129,10 +136,11 @@ func (u *orderController) TakeOrder(c echo.Context) error {
 	if err := c.Validate(takeOrder); err != nil {
 		return err
 	}
-	err := u.service.TakeOrder(takeOrder.Code, c.Request().Context())
+	err := u.service.TakeOrder(takeOrder, c.Request().Context())
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, echo.Map{
-			"message": customerrors.ErrOrderCode.Error()})
+			"message": err.Error(),
+		})
 	}
 	return c.JSON(http.StatusOK, echo.Map{
 		"message": "success take order",
@@ -157,5 +165,21 @@ func (u *orderController) OrderReady(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, echo.Map{
 		"message": "order ready in checkpoint",
+	})
+}
+
+func (u *orderController) GetQRCode(c echo.Context) error {
+	hashCode := c.Param("hash_code")
+	qr, err := u.qrCode.GenerateQRCode(hashCode)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{
+			"message": customerrors.ErrGenerateQR,
+		})
+	}
+	return c.JSON(http.StatusOK, echo.Map{
+		"message": "get qrcode success",
+		"data": map[string][]byte{
+			"base64": qr,
+		},
 	})
 }

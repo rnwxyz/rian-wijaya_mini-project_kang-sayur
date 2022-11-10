@@ -16,6 +16,15 @@ type orderRepositoryImpl struct {
 	db *gorm.DB
 }
 
+// FindOrderById implements OrderRepository
+func (r *orderRepositoryImpl) FindOrderById(order *model.Order, ctx context.Context) error {
+	err := r.db.WithContext(ctx).First(&order).Error
+	if err != nil {
+		return customerrors.ErrNotFound
+	}
+	return nil
+}
+
 // CreateOrder implements OrderRepository
 func (r *orderRepositoryImpl) CreateOrder(order *model.Order, ctx context.Context) error {
 	err := r.db.WithContext(ctx).Create(order).Error
@@ -101,6 +110,7 @@ func (r *orderRepositoryImpl) OrderDone(orderId uuid.UUID, ctx context.Context) 
 
 	res := r.db.WithContext(ctx).Model(&order).Updates(&model.Order{
 		StatusOrderID: constants.Success_status_order_id,
+		Code:          "0",
 		ExpiredOrder:  time.Now(),
 	})
 	if res.Error != nil {

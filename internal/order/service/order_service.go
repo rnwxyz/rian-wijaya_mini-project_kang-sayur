@@ -13,5 +13,5 @@ type OrderService interface {
 	FindOrderDetail(userId string, orderId string, ctx context.Context) (*dto.OrderWithDetailResponse, error)
 	CencelOder(orderId string, ctx context.Context) error
 	OrderReady(orderId string, ctx context.Context) error
-	TakeOrder(code string, ctx context.Context) error
+	TakeOrder(body dto.TakeOrder, ctx context.Context) error
 }

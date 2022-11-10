@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"encoding/base64"
+	"fmt"
 	"strings"
 	"time"
 
@@ -135,31 +136,43 @@ func (s *orderServiceImpl) FindOrderDetail(userId string, orderId string, ctx co
 }
 
 // TakeOrder implements OrderService
-func (s *orderServiceImpl) TakeOrder(code string, ctx context.Context) error {
-	byt, err := base64.StdEncoding.DecodeString(code)
+func (s *orderServiceImpl) TakeOrder(body dto.TakeOrder, ctx context.Context) error {
+	byt, err := base64.StdEncoding.DecodeString(body.Code)
 	if err != nil {
 		return customerrors.ErrOrderCode
 	}
 	// data have 3 index orderId, order code, and checkpoint id
 	data := strings.Split(string(byt), " ")
+
 	id, err := uuid.Parse(data[0])
 	if err != nil {
 		return customerrors.ErrOrderCode
 	}
+
 	orderCode := data[1]
 	checkpointId, err := uuid.Parse(data[2])
 	if err != nil {
 		return customerrors.ErrOrderCode
 	}
+
 	order := model.Order{
-		ID:           id,
-		Code:         orderCode,
-		CheckpointID: checkpointId,
+		ID: id,
 	}
-	err = s.orderRepo.FindOrderDetail(&order, ctx)
+	err = s.orderRepo.FindOrderById(&order, ctx)
 	if err != nil {
-		return customerrors.ErrOrderCode
+		return err
 	}
+
+	if body.CheckpointID != checkpointId.String() {
+		return customerrors.ErrWrongCheckpoint
+	}
+
+	fmt.Println(checkpointId, "  ", order.CheckpointID)
+
+	if orderCode != order.Code {
+		return customerrors.ErrCodeUsed
+	}
+
 	err = s.orderRepo.OrderDone(id, ctx)
 	if err != nil {
 		return err
@@ -184,6 +197,16 @@ func (s *orderServiceImpl) OrderReady(orderId string, ctx context.Context) error
 	if err != nil {
 		return customerrors.ErrInvalidId
 	}
+	order := model.Order{
+		ID: id,
+	}
+	err = s.orderRepo.FindOrderById(&order, ctx)
+	if err != nil {
+		return err
+	}
+	if order.StatusOrderID != constants.Waiting_status_order_id {
+		return customerrors.ErrUpdateStatusOrder
+	}
 	err = s.orderRepo.OrderReady(id, ctx)
 	return err
 }
@@ -193,6 +216,16 @@ func (s *orderServiceImpl) CencelOder(orderId string, ctx context.Context) error
 	id, err := uuid.Parse(orderId)
 	if err != nil {
 		return customerrors.ErrInvalidId
+	}
+	order := model.Order{
+		ID: id,
+	}
+	err = s.orderRepo.FindOrderById(&order, ctx)
+	if err != nil {
+		return err
+	}
+	if order.StatusOrderID == constants.Pending_status_order_id {
+		return customerrors.ErrUpdateStatusOrder
 	}
 	err = s.orderRepo.CencelOrder(id, ctx)
 	return err

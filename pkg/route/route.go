@@ -28,6 +28,7 @@ import (
 	_middleware "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils/middleware"
 	password "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils/password"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils/payment"
+	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils/qrcode"
 	_validator "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils/validator"
 	"gorm.io/gorm"
 )
@@ -74,7 +75,7 @@ func InitGlobalRoute(e *echo.Echo, db *gorm.DB) {
 	// init order controller
 	orderRepository := pkgOrderRepository.NewOrderRepository(db)
 	orderService := pkgOrderService.NewOrderService(orderRepository, itemRepository, &payment.Midtrans{}, userRepository)
-	orderController := pkgOrderController.NewOrderController(orderService, jwtService)
+	orderController := pkgOrderController.NewOrderController(orderService, jwtService, &qrcode.QRCode{})
 	orderController.InitRoute(auth)
 
 	// init transaction controller

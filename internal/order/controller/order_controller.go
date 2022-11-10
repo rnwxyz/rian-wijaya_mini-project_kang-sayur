@@ -7,6 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/order/dto"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/order/service"
+	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/constants"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils"
 )
 
@@ -115,7 +116,7 @@ func (u *orderController) CencelOrder(c echo.Context) error {
 func (u *orderController) TakeOrder(c echo.Context) error {
 	claims := u.jwtService.GetClaims(&c)
 	role := claims["role_id"].(float64)
-	if role < 3 {
+	if role != constants.Role_admin {
 		return c.JSON(http.StatusForbidden, echo.Map{
 			"message": utils.ErrPermission.Error(),
 		})
@@ -141,7 +142,7 @@ func (u *orderController) TakeOrder(c echo.Context) error {
 func (u *orderController) OrderReady(c echo.Context) error {
 	claims := u.jwtService.GetClaims(&c)
 	role := claims["role_id"].(float64)
-	if role < 3 {
+	if role != constants.Role_admin {
 		return c.JSON(http.StatusForbidden, echo.Map{
 			"message": utils.ErrPermission.Error(),
 		})

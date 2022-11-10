@@ -14,6 +14,7 @@ import (
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/user/dto"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/user/service"
 	usm "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/user/service/mock"
+	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/constants"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils"
 	utm "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils/mock"
 	"github.com/stretchr/testify/suite"
@@ -383,7 +384,7 @@ func (s *suiteUserController) TestGetAllUsers() {
 		{
 			Name: "success",
 			JwtRes: jwt.MapClaims{
-				"role_id": float64(3),
+				"role_id": float64(constants.Role_admin),
 			},
 			ExpectedStatus: 200,
 			FindAllUsersRes: dto.UsersResponse{
@@ -411,7 +412,7 @@ func (s *suiteUserController) TestGetAllUsers() {
 		{
 			Name: "forbidden",
 			JwtRes: jwt.MapClaims{
-				"role_id": float64(1),
+				"role_id": float64(constants.Role_user),
 			},
 			ExpectedStatus:  403,
 			FindAllUsersRes: nil,
@@ -423,7 +424,7 @@ func (s *suiteUserController) TestGetAllUsers() {
 		{
 			Name: "internal server error",
 			JwtRes: jwt.MapClaims{
-				"role_id": float64(3),
+				"role_id": float64(constants.Role_admin),
 			},
 			ExpectedStatus:  500,
 			FindAllUsersRes: nil,
@@ -563,7 +564,7 @@ func (s *suiteUserController) TestDeleteUser() {
 		{
 			Name: "success",
 			JwtRes: jwt.MapClaims{
-				"role_id": float64(3),
+				"role_id": float64(constants.Role_admin),
 			},
 			ExpectedStatus: 200,
 			DeleteUserErr:  nil,
@@ -574,7 +575,7 @@ func (s *suiteUserController) TestDeleteUser() {
 		{
 			Name: "forbidden",
 			JwtRes: jwt.MapClaims{
-				"role_id": float64(2),
+				"role_id": float64(constants.Role_user),
 			},
 			ExpectedStatus: 403,
 			DeleteUserErr:  nil,
@@ -585,7 +586,7 @@ func (s *suiteUserController) TestDeleteUser() {
 		{
 			Name: "delete error",
 			JwtRes: jwt.MapClaims{
-				"role_id": float64(3),
+				"role_id": float64(constants.Role_admin),
 			},
 			ExpectedStatus: 400,
 			DeleteUserErr:  errors.New("err"),

@@ -7,6 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/user/dto"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/user/service"
+	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/constants"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils"
 )
 
@@ -112,7 +113,7 @@ func (u *userController) GetUser(c echo.Context) error {
 func (u *userController) GetUsers(c echo.Context) error {
 	claims := u.jwtService.GetClaims(&c)
 	role := claims["role_id"].(float64)
-	if role < 3 {
+	if role != constants.Role_admin {
 		return c.JSON(http.StatusForbidden, echo.Map{
 			"message": utils.ErrPermission.Error(),
 		})
@@ -151,7 +152,7 @@ func (u *userController) UpdateUser(c echo.Context) error {
 func (u *userController) DeleteUser(c echo.Context) error {
 	claims := u.jwtService.GetClaims(&c)
 	role := claims["role_id"].(float64)
-	if role < 3 {
+	if role != constants.Role_admin {
 		return c.JSON(http.StatusForbidden, echo.Map{
 			"message": utils.ErrPermission.Error(),
 		})

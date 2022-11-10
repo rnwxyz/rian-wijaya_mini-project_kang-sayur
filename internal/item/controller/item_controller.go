@@ -7,6 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/item/dto"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/item/service"
+	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/constants"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils"
 )
 
@@ -40,7 +41,7 @@ func (u *itemController) InitRoute(auth *echo.Group) {
 func (u *itemController) CreateItem(c echo.Context) error {
 	claims := u.jwtService.GetClaims(&c)
 	role := claims["role_id"].(float64)
-	if role < 3 {
+	if role != constants.Role_admin {
 		return c.JSON(http.StatusForbidden, echo.Map{
 			"message": utils.ErrPermission.Error(),
 		})
@@ -72,7 +73,7 @@ func (u *itemController) CreateItem(c echo.Context) error {
 func (u *itemController) CreateCategory(c echo.Context) error {
 	claims := u.jwtService.GetClaims(&c)
 	role := claims["role_id"].(float64)
-	if role < 3 {
+	if role != constants.Role_admin {
 		return c.JSON(http.StatusForbidden, echo.Map{
 			"message": utils.ErrPermission.Error(),
 		})
@@ -104,7 +105,7 @@ func (u *itemController) CreateCategory(c echo.Context) error {
 func (u *itemController) UpdateItem(c echo.Context) error {
 	claims := u.jwtService.GetClaims(&c)
 	role := claims["role_id"].(float64)
-	if role < 3 {
+	if role != constants.Role_admin {
 		return c.JSON(http.StatusForbidden, echo.Map{
 			"message": utils.ErrPermission.Error(),
 		})

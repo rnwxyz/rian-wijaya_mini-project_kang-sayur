@@ -48,7 +48,7 @@ func (u *userServiceImpl) CreateDefaultAdmin() error {
 	if err != nil {
 		return err
 	}
-	if len(users) >= 1 {
+	if len(users) > 0 {
 		return nil
 	}
 	hashPassword, err := u.password.HashPassword(constants.Default_password_admin)

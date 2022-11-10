@@ -27,7 +27,8 @@ func NewCheckpointController(service service.CheckpointService, jwt JWTService) 
 
 func (u *checkpointController) InitRoute(auth *echo.Group) {
 	auth.POST("/checkpoint", u.CreateCheckpoint)
-	auth.GET("/checkpoint", u.GetCheckpoints)
+	auth.GET("/checkpoint", u.GetCheckpointByUser)
+	auth.GET("/checkpoint/all", u.GetCheckpoints)
 }
 
 func (u *checkpointController) CreateCheckpoint(c echo.Context) error {
@@ -70,7 +71,27 @@ func (u *checkpointController) GetCheckpoints(c echo.Context) error {
 		})
 	}
 	return c.JSON(http.StatusOK, echo.Map{
-		"message": "get user success",
+		"message": "get checkpoint success",
+		"data":    checkpoints,
+	})
+}
+
+func (u *checkpointController) GetCheckpointByUser(c echo.Context) error {
+	claims := u.jwtService.GetClaims(&c)
+	userId := claims["user_id"].(string)
+	checkpoints, err := u.service.FindCheckpointsByUser(userId, c.Request().Context())
+	if err != nil {
+		if err == utils.ErrCheckpointNotCovered {
+			return c.JSON(http.StatusNotFound, echo.Map{
+				"message": err.Error(),
+			})
+		}
+		return c.JSON(http.StatusInternalServerError, echo.Map{
+			"message": err.Error(),
+		})
+	}
+	return c.JSON(http.StatusOK, echo.Map{
+		"message": "get checkpoint success",
 		"data":    checkpoints,
 	})
 }

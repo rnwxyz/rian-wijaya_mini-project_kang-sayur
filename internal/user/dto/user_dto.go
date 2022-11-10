@@ -6,9 +6,9 @@ import (
 )
 
 type UserSignup struct {
-	Name     string `json:"name"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Name     string `json:"name"  validate:"required"`
+	Email    string `json:"email"  validate:"required"`
+	Password string `json:"password"  validate:"required"`
 }
 
 func (u *UserSignup) ToModel() *model.User {
@@ -19,22 +19,22 @@ func (u *UserSignup) ToModel() *model.User {
 }
 
 type UserUpdate struct {
-	Name       string `json:"name"`
-	Phone      string `json:"phone"`
-	ProvinceID uint   `json:"province_id"`
-	RegencyID  uint   `json:"regency_id"`
-	DistrictID uint   `json:"district_id"`
-	VillageID  uint   `json:"village_id"`
+	Name       string `json:"name,omitempty"`
+	Phone      string `json:"phone,omitempty"`
+	ProvinceID *uint  `json:"province_id,omitempty"`
+	RegencyID  *uint  `json:"regency_id,omitempty"`
+	DistrictID *uint  `json:"district_id,omitempty"`
+	VillageID  *uint  `json:"village_id,omitempty"`
 }
 
 func (u *UserUpdate) ToModel() *model.User {
 	return &model.User{
 		Name:       u.Name,
 		Phone:      u.Phone,
-		ProvinceID: &u.ProvinceID,
-		RegencyID:  &u.RegencyID,
-		DistrictID: &u.DistrictID,
-		VillageID:  &u.VillageID,
+		ProvinceID: u.ProvinceID,
+		RegencyID:  u.RegencyID,
+		DistrictID: u.DistrictID,
+		VillageID:  u.VillageID,
 	}
 }
 

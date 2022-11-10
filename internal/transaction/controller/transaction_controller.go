@@ -26,8 +26,11 @@ func NewTransactionController(service service.TransactionService, jwt JWTService
 }
 
 func (u *transactionController) InitRoute(api, auth *echo.Group) {
-	api.POST("/transaction/notification", u.TransactionNotification)
-	auth.GET("/transaction", u.GetTransactions)
+	transactions := api.Group("/transactions")
+	transactions.POST("/notification", u.TransactionNotification)
+
+	transactionsWithAuth := auth.Group("/transactions")
+	transactionsWithAuth.GET("", u.GetTransactions)
 }
 
 func (u *transactionController) TransactionNotification(c echo.Context) error {

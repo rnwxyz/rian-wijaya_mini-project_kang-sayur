@@ -489,19 +489,6 @@ func (s *suiteUserController) TestUpdateUser() {
 			},
 		},
 		{
-			Name: "forbidden",
-			JwtRes: jwt.MapClaims{
-				"user_id": uuid.New().String(),
-			},
-			Body: map[string]interface{}{
-				"name": "test",
-			},
-			ExpectedStatus: 403,
-			ExpectedResult: map[string]interface{}{
-				"message": utils.ErrPermission.Error(),
-			},
-		},
-		{
 			Name: "body type invalid",
 			JwtRes: jwt.MapClaims{
 				"user_id": varUUID.String(),

@@ -29,10 +29,12 @@ func NewUserController(service service.UserService, jwt JWTService) *userControl
 func (u *userController) InitRoute(api *echo.Group, auth *echo.Group) {
 	api.POST("/signup", u.SignUp)
 	api.POST("/login", u.Login)
-	auth.GET("/user/all", u.GetUsers)
-	auth.GET("/user", u.GetUser)
-	auth.PUT("/user/:id", u.UpdateUser)
-	auth.DELETE("/user/:id", u.DeleteUser)
+
+	users := auth.Group("/users")
+	users.GET("", u.GetUsers)
+	users.PUT("", u.UpdateUser)
+	users.DELETE("/:id", u.DeleteUser)
+	users.GET("/profile", u.GetUser)
 }
 
 func (u *userController) SignUp(c echo.Context) error {
@@ -130,18 +132,12 @@ func (u *userController) GetUsers(c echo.Context) error {
 func (u *userController) UpdateUser(c echo.Context) error {
 	claims := u.jwtService.GetClaims(&c)
 	userId := claims["user_id"].(string)
-	paramId := c.Param("id")
-	if userId != paramId {
-		return c.JSON(http.StatusForbidden, echo.Map{
-			"message": utils.ErrPermission.Error(),
-		})
-	}
 	var user dto.UserUpdate
 	if err := c.Bind(&user); err != nil {
 		return c.JSON(http.StatusBadRequest, echo.Map{
 			"message": utils.ErrBadRequestBody.Error()})
 	}
-	err := u.service.UpdateUser(paramId, user, c.Request().Context())
+	err := u.service.UpdateUser(userId, user, c.Request().Context())
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, echo.Map{
 			"message": err.Error(),

@@ -19,10 +19,11 @@ func NewRegionController(regionService service.RegionService) *regionController 
 }
 
 func (r *regionController) InitRoute(auth *echo.Group) {
-	auth.GET("/region/province", r.GetProvince)
-	auth.GET("/region/regency/:province_id", r.GetRegency)
-	auth.GET("/region/district/:regency_id", r.GetDistrict)
-	auth.GET("/region/village/:district_id", r.GetVillage)
+	regions := auth.Group("/regions")
+	regions.GET("/provinces", r.GetProvince)
+	regions.GET("/regencies/:province_id", r.GetRegency)
+	regions.GET("/districts/:regency_id", r.GetDistrict)
+	regions.GET("/villages/:district_id", r.GetVillage)
 }
 
 func (r *regionController) GetProvince(c echo.Context) error {

@@ -26,12 +26,15 @@ func NewItemController(service service.ItemService, jwt JWTService) *itemControl
 }
 
 func (u *itemController) InitRoute(auth *echo.Group) {
-	auth.POST("/item", u.CreateItem)
-	auth.GET("/item", u.GetItems)
-	auth.PUT("/item/:id", u.UpdateItem)
-	auth.POST("/item/category", u.CreateCategory)
-	auth.GET("/item/category", u.GetCategories)
-	auth.GET("/item/category/:category_id", u.GetItemsByCategory)
+	items := auth.Group("/items")
+	items.POST("", u.CreateItem)
+	items.GET("", u.GetItems)
+	items.PUT("/:id", u.UpdateItem)
+
+	categories := items.Group("/categories")
+	categories.POST("", u.CreateCategory)
+	categories.GET("", u.GetCategories)
+	categories.GET("/:id", u.GetItemsByCategory)
 }
 
 func (u *itemController) CreateItem(c echo.Context) error {
@@ -157,7 +160,7 @@ func (u *itemController) GetCategories(c echo.Context) error {
 }
 
 func (u *itemController) GetItemsByCategory(c echo.Context) error {
-	paramId := c.Param("category_id")
+	paramId := c.Param("id")
 	items, err := u.service.FindItemsByCategory(paramId, c.Request().Context())
 	if err != nil {
 		if err == utils.ErrBadRequestBody {

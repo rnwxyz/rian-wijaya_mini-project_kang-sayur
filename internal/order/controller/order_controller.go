@@ -27,12 +27,13 @@ func NewOrderController(service service.OrderService, jwt JWTService) *orderCont
 }
 
 func (u *orderController) InitRoute(auth *echo.Group) {
-	auth.POST("/order", u.CreateOrder)
-	auth.POST("/order/takeorder", u.TakeOrder)
-	auth.GET("/order", u.GetOrder)
-	auth.GET("/order/:id", u.GetOrderDetail)
-	auth.PUT("/order/:id/cencel", u.CencelOrder)
-	auth.PUT("/order/:id/ready", u.OrderReady)
+	orders := auth.Group("/orders")
+	orders.POST("", u.CreateOrder)
+	orders.GET("", u.GetOrder)
+	orders.GET("/:id", u.GetOrderDetail)
+	orders.POST("/takeorder", u.TakeOrder)
+	orders.PUT("/cencel/:id", u.CencelOrder)
+	orders.PUT("/ready/:id", u.OrderReady)
 }
 
 func (u *orderController) CreateOrder(c echo.Context) error {

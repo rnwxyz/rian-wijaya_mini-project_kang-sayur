@@ -26,9 +26,10 @@ func NewCheckpointController(service service.CheckpointService, jwt JWTService) 
 }
 
 func (u *checkpointController) InitRoute(auth *echo.Group) {
-	auth.POST("/checkpoint", u.CreateCheckpoint)
-	auth.GET("/checkpoint", u.GetCheckpointByUser)
-	auth.GET("/checkpoint/all", u.GetCheckpoints)
+	checkpoints := auth.Group("/checkpoints")
+	checkpoints.POST("", u.CreateCheckpoint)
+	checkpoints.GET("", u.GetCheckpoints)
+	checkpoints.GET("/profile", u.GetCheckpointByUser)
 }
 
 func (u *checkpointController) CreateCheckpoint(c echo.Context) error {

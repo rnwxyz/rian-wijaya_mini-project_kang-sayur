@@ -8,7 +8,7 @@ import (
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/checkpoint/dto"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/checkpoint/repository"
 	urp "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/user/repository"
-	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils"
+	customerrors "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils/custom_errors"
 )
 
 type checkpointServiceImpl struct {
@@ -20,7 +20,7 @@ type checkpointServiceImpl struct {
 func (s *checkpointServiceImpl) FindCheckpointsByUser(id string, ctx context.Context) (dto.CheckpointsResponse, error) {
 	_, err := uuid.Parse(id)
 	if err != nil {
-		return nil, utils.ErrInvalidId
+		return nil, customerrors.ErrInvalidId
 	}
 	user, _ := s.userRepo.FindUserByID(id, ctx)
 	var checkpointsResponse dto.CheckpointsResponse
@@ -62,7 +62,7 @@ func (s *checkpointServiceImpl) FindCheckpointsByUser(id string, ctx context.Con
 		return checkpointsResponse, nil
 	}
 
-	return nil, utils.ErrCheckpointNotCovered
+	return nil, customerrors.ErrCheckpointNotCovered
 }
 
 // CreateCheckpoint implements CheckpointService
@@ -73,7 +73,7 @@ func (s *checkpointServiceImpl) CreateCheckpoint(body dto.CheckpointRequest, ctx
 	err := s.repo.CreateCheckpoint(checkpoint, ctx)
 	if err != nil {
 		if strings.Contains(err.Error(), "Cannot add or update a child row") {
-			return uuid.Nil, utils.ErrBadRequestBody
+			return uuid.Nil, customerrors.ErrBadRequestBody
 		}
 		return uuid.Nil, err
 	}

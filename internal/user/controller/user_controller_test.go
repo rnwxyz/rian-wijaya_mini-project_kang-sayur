@@ -15,16 +15,17 @@ import (
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/user/service"
 	usm "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/user/service/mock"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/constants"
-	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils"
-	utm "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils/mock"
+	customerrors "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils/custom_errors"
+	mm "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils/middleware/mock"
+	vm "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils/validator/mock"
 	"github.com/stretchr/testify/suite"
 )
 
 type suiteUserController struct {
 	suite.Suite
 	userServiceMock *usm.UserServiceMock
-	JWTServiceMock  *utm.MockJWTService
-	validaorMock    *utm.CustomValidatorMock
+	JWTServiceMock  *mm.MockJWTService
+	validaorMock    *vm.CustomValidatorMock
 	userController  *userController
 	echoNew         *echo.Echo
 }
@@ -38,8 +39,8 @@ func newUserControllerMock(service service.UserService, jwt JWTService) *userCon
 
 func (s *suiteUserController) SetupTest() {
 	s.userServiceMock = new(usm.UserServiceMock)
-	s.JWTServiceMock = new(utm.MockJWTService)
-	s.validaorMock = new(utm.CustomValidatorMock)
+	s.JWTServiceMock = new(mm.MockJWTService)
+	s.validaorMock = new(vm.CustomValidatorMock)
 	s.userController = newUserControllerMock(s.userServiceMock, s.JWTServiceMock)
 	s.echoNew = echo.New()
 	s.echoNew.Validator = s.validaorMock
@@ -84,7 +85,7 @@ func (s *suiteUserController) TestSignUp() {
 			CreateUserRes:  uuid.Nil,
 			CreateUserErr:  nil,
 			ExpectedResult: map[string]interface{}{
-				"message": utils.ErrBadRequestBody.Error(),
+				"message": customerrors.ErrBadRequestBody.Error(),
 			},
 		},
 		{
@@ -109,9 +110,9 @@ func (s *suiteUserController) TestSignUp() {
 			ValidatorErr:   nil,
 			ExpectedStatus: 400,
 			CreateUserRes:  uuid.Nil,
-			CreateUserErr:  utils.ErrEmailAlredyExist,
+			CreateUserErr:  customerrors.ErrEmailAlredyExist,
 			ExpectedResult: map[string]interface{}{
-				"message": utils.ErrEmailAlredyExist.Error(),
+				"message": customerrors.ErrEmailAlredyExist.Error(),
 			},
 		},
 		{
@@ -198,7 +199,7 @@ func (s *suiteUserController) TestLogin() {
 			LoginRes:       "",
 			LoginErr:       nil,
 			ExpectedResult: map[string]interface{}{
-				"message": utils.ErrBadRequestBody.Error(),
+				"message": customerrors.ErrBadRequestBody.Error(),
 			},
 		},
 		{
@@ -223,9 +224,9 @@ func (s *suiteUserController) TestLogin() {
 			ValidatorErr:   nil,
 			ExpectedStatus: 400,
 			LoginRes:       "",
-			LoginErr:       utils.ErrNotFound,
+			LoginErr:       customerrors.ErrNotFound,
 			ExpectedResult: map[string]interface{}{
-				"message": utils.ErrNotFound.Error(),
+				"message": customerrors.ErrNotFound.Error(),
 			},
 		},
 		{
@@ -237,9 +238,9 @@ func (s *suiteUserController) TestLogin() {
 			ValidatorErr:   nil,
 			ExpectedStatus: 400,
 			LoginRes:       "",
-			LoginErr:       utils.ErrInvalidPassword,
+			LoginErr:       customerrors.ErrInvalidPassword,
 			ExpectedResult: map[string]interface{}{
-				"message": utils.ErrInvalidPassword.Error(),
+				"message": customerrors.ErrInvalidPassword.Error(),
 			},
 		},
 		{
@@ -273,7 +274,6 @@ func (s *suiteUserController) TestLogin() {
 			//define mock
 			mock1 := s.userServiceMock.On("Login").Return(v.LoginRes, v.LoginErr)
 			mock2 := s.validaorMock.On("Validate").Return(v.ValidatorErr)
-
 			err = s.userController.Login(ctx)
 			s.NoError(err)
 
@@ -418,7 +418,7 @@ func (s *suiteUserController) TestGetAllUsers() {
 			FindAllUsersRes: nil,
 			FindAllUsersErr: nil,
 			ExpectedResult: map[string]interface{}{
-				"message": utils.ErrPermission.Error(),
+				"message": customerrors.ErrPermission.Error(),
 			},
 		},
 		{
@@ -500,7 +500,7 @@ func (s *suiteUserController) TestUpdateUser() {
 			UpdateUserErr:  nil,
 			ExpectedStatus: 400,
 			ExpectedResult: map[string]interface{}{
-				"message": utils.ErrBadRequestBody.Error(),
+				"message": customerrors.ErrBadRequestBody.Error(),
 			},
 		},
 		{
@@ -580,7 +580,7 @@ func (s *suiteUserController) TestDeleteUser() {
 			ExpectedStatus: 403,
 			DeleteUserErr:  nil,
 			ExpectedResult: map[string]interface{}{
-				"message": utils.ErrPermission.Error(),
+				"message": customerrors.ErrPermission.Error(),
 			},
 		},
 		{

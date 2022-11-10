@@ -25,17 +25,19 @@ import (
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/config"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/constants"
 	importcsv "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/import_csv"
-	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/payment"
-	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils"
+	_middleware "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils/middleware"
+	password "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils/password"
+	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils/payment"
+	_validator "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils/validator"
 	"gorm.io/gorm"
 )
 
 func InitGlobalRoute(e *echo.Echo, db *gorm.DB) {
 	e.Use(middleware.Recover())
-	e.Validator = &utils.CustomValidator{
+	e.Validator = &_validator.CustomValidator{
 		Validator: validator.New(),
 	}
-	jwtService := utils.NewJWTService(config.Cfg.JWT_SECRET, constants.ExpToken)
+	jwtService := _middleware.NewJWTService(config.Cfg.JWT_SECRET, constants.ExpToken)
 
 	api := e.Group("/api")
 
@@ -46,7 +48,7 @@ func InitGlobalRoute(e *echo.Echo, db *gorm.DB) {
 
 	//init user controller
 	userRepository := pkgUserRepository.NewUserRepository(db)
-	userService := pkgUserService.NewUserService(userRepository, utils.Password{}, jwtService)
+	userService := pkgUserService.NewUserService(userRepository, password.Password{}, jwtService)
 	userController := pkgUserController.NewUserController(userService, jwtService)
 	userController.InitRoute(v1, auth)
 
@@ -71,7 +73,7 @@ func InitGlobalRoute(e *echo.Echo, db *gorm.DB) {
 
 	// init order controller
 	orderRepository := pkgOrderRepository.NewOrderRepository(db)
-	orderService := pkgOrderService.NewOrderService(orderRepository, itemRepository, payment.Midtrans{}, userRepository)
+	orderService := pkgOrderService.NewOrderService(orderRepository, itemRepository, &payment.Midtrans{}, userRepository)
 	orderController := pkgOrderController.NewOrderController(orderService, jwtService)
 	orderController.InitRoute(auth)
 

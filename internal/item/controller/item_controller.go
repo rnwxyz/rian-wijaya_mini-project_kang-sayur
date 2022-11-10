@@ -8,7 +8,7 @@ import (
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/item/dto"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/item/service"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/constants"
-	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils"
+	customerrors "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils/custom_errors"
 )
 
 type JWTService interface {
@@ -43,20 +43,20 @@ func (u *itemController) CreateItem(c echo.Context) error {
 	role := claims["role_id"].(float64)
 	if role != constants.Role_admin {
 		return c.JSON(http.StatusForbidden, echo.Map{
-			"message": utils.ErrPermission.Error(),
+			"message": customerrors.ErrPermission.Error(),
 		})
 	}
 	var itemBody dto.ItemRequest
 	if err := c.Bind(&itemBody); err != nil {
 		return c.JSON(http.StatusBadRequest, echo.Map{
-			"message": utils.ErrBadRequestBody.Error()})
+			"message": customerrors.ErrBadRequestBody.Error()})
 	}
 	if err := c.Validate(itemBody); err != nil {
 		return err
 	}
 	id, err := u.service.CreateItem(itemBody, c.Request().Context())
 	if err != nil {
-		if err == utils.ErrBadRequestBody || err == utils.ErrDuplicateData {
+		if err == customerrors.ErrBadRequestBody || err == customerrors.ErrDuplicateData {
 			return c.JSON(http.StatusBadRequest, echo.Map{
 				"message": err.Error()})
 		}
@@ -75,20 +75,20 @@ func (u *itemController) CreateCategory(c echo.Context) error {
 	role := claims["role_id"].(float64)
 	if role != constants.Role_admin {
 		return c.JSON(http.StatusForbidden, echo.Map{
-			"message": utils.ErrPermission.Error(),
+			"message": customerrors.ErrPermission.Error(),
 		})
 	}
 	var categoryBody dto.CategoryRequest
 	if err := c.Bind(&categoryBody); err != nil {
 		return c.JSON(http.StatusBadRequest, echo.Map{
-			"message": utils.ErrBadRequestBody.Error()})
+			"message": customerrors.ErrBadRequestBody.Error()})
 	}
 	if err := c.Validate(categoryBody); err != nil {
 		return err
 	}
 	id, err := u.service.CreateCategory(categoryBody, c.Request().Context())
 	if err != nil {
-		if err == utils.ErrBadRequestBody || err == utils.ErrDuplicateData {
+		if err == customerrors.ErrBadRequestBody || err == customerrors.ErrDuplicateData {
 			return c.JSON(http.StatusBadRequest, echo.Map{
 				"message": err.Error()})
 		}
@@ -107,21 +107,21 @@ func (u *itemController) UpdateItem(c echo.Context) error {
 	role := claims["role_id"].(float64)
 	if role != constants.Role_admin {
 		return c.JSON(http.StatusForbidden, echo.Map{
-			"message": utils.ErrPermission.Error(),
+			"message": customerrors.ErrPermission.Error(),
 		})
 	}
 	id := c.Param("id")
 	var itemBody dto.ItemRequest
 	if err := c.Bind(&itemBody); err != nil {
 		return c.JSON(http.StatusBadRequest, echo.Map{
-			"message": utils.ErrBadRequestBody.Error()})
+			"message": customerrors.ErrBadRequestBody.Error()})
 	}
 	if err := c.Validate(itemBody); err != nil {
 		return err
 	}
 	err := u.service.UpdateItem(id, itemBody, c.Request().Context())
 	if err != nil {
-		if err == utils.ErrBadRequestBody || err == utils.ErrDuplicateData || err == utils.ErrInvalidId {
+		if err == customerrors.ErrBadRequestBody || err == customerrors.ErrDuplicateData || err == customerrors.ErrInvalidId {
 			return c.JSON(http.StatusBadRequest, echo.Map{
 				"message": err.Error()})
 		}
@@ -164,7 +164,7 @@ func (u *itemController) GetItemsByCategory(c echo.Context) error {
 	paramId := c.Param("id")
 	items, err := u.service.FindItemsByCategory(paramId, c.Request().Context())
 	if err != nil {
-		if err == utils.ErrBadRequestBody {
+		if err == customerrors.ErrBadRequestBody {
 			return c.JSON(http.StatusBadRequest, echo.Map{
 				"message": err.Error()})
 		}

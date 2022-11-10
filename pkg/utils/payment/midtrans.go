@@ -1,7 +1,7 @@
 package payment
 
 import (
-	"fmt"
+	"errors"
 	"strconv"
 
 	"github.com/midtrans/midtrans-go"
@@ -14,7 +14,7 @@ import (
 type Midtrans struct {
 }
 
-func (*Midtrans) NewTransaction(order model.Order, user model.User) string {
+func (*Midtrans) NewTransaction(order model.Order, user model.User) (string, error) {
 	var s snap.Client
 	s.New(config.Cfg.MIDTRANS_SERVER_KEY, midtrans.Sandbox)
 	shipping := strconv.Itoa(constants.Shipping_cost)
@@ -37,7 +37,8 @@ func (*Midtrans) NewTransaction(order model.Order, user model.User) string {
 	}
 	resp, err := s.CreateTransactionUrl(req)
 	if err != nil {
-		fmt.Println("Error :", err.GetMessage())
+		return "", errors.New(err.Message)
 	}
-	return resp
+
+	return resp, nil
 }

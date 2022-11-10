@@ -6,7 +6,7 @@ import (
 
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/item/dto"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/item/repository"
-	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils"
+	customerrors "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils/custom_errors"
 )
 
 type itemServiceImpl struct {
@@ -48,7 +48,7 @@ func (s *itemServiceImpl) FindCategories(ctx context.Context) (dto.CategoriesRes
 func (s *itemServiceImpl) FindItemsByCategory(categoryId string, ctx context.Context) (dto.ItemsResponse, error) {
 	id, err := strconv.Atoi(categoryId)
 	if err != nil {
-		return nil, utils.ErrInvalidId
+		return nil, customerrors.ErrInvalidId
 	}
 	items, err := s.repo.FindItemsByCategory(uint(id), ctx)
 	if err != nil {
@@ -74,7 +74,7 @@ func (s *itemServiceImpl) FindItems(ctx context.Context) (dto.ItemsResponse, err
 func (s *itemServiceImpl) UpdateItem(id string, body dto.ItemRequest, ctx context.Context) error {
 	itemId, err := strconv.Atoi(id)
 	if err != nil {
-		return utils.ErrInvalidId
+		return customerrors.ErrInvalidId
 	}
 	item := body.ToModel()
 	item.ID = uint(itemId)

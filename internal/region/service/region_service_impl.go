@@ -10,7 +10,7 @@ import (
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/constants"
 	importcsv "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/import_csv"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/model"
-	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils"
+	customerrors "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils/custom_errors"
 )
 
 type regionServiceImpl struct {
@@ -33,7 +33,7 @@ func (r *regionServiceImpl) FindRegency(id *string, ctx context.Context) (dto.Re
 	if id != nil {
 		idInt, err := strconv.Atoi(*id)
 		if err != nil {
-			return nil, utils.ErrInvalidId
+			return nil, customerrors.ErrInvalidId
 		}
 		regency.ProvinceID = uint(idInt)
 	}
@@ -52,7 +52,7 @@ func (r *regionServiceImpl) FindDistrict(id *string, ctx context.Context) (dto.D
 	if id != nil {
 		idInt, err := strconv.Atoi(*id)
 		if err != nil {
-			return nil, utils.ErrInvalidId
+			return nil, customerrors.ErrInvalidId
 		}
 		district.RegencyID = uint(idInt)
 	}
@@ -71,7 +71,7 @@ func (r *regionServiceImpl) FindVillage(id *string, ctx context.Context) (dto.Vi
 	if id != nil {
 		idInt, err := strconv.Atoi(*id)
 		if err != nil {
-			return nil, utils.ErrInvalidId
+			return nil, customerrors.ErrInvalidId
 		}
 		village.DistrictID = uint(idInt)
 	}

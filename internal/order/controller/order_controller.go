@@ -8,7 +8,7 @@ import (
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/order/dto"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/order/service"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/constants"
-	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils"
+	customerrors "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils/custom_errors"
 )
 
 type JWTService interface {
@@ -44,7 +44,7 @@ func (u *orderController) CreateOrder(c echo.Context) error {
 	var orderBody dto.OrderRequest
 	if err := c.Bind(&orderBody); err != nil {
 		return c.JSON(http.StatusBadRequest, echo.Map{
-			"message": utils.ErrBadRequestBody.Error()})
+			"message": customerrors.ErrBadRequestBody.Error()})
 	}
 	if err := c.Validate(orderBody); err != nil {
 		return err
@@ -52,7 +52,7 @@ func (u *orderController) CreateOrder(c echo.Context) error {
 
 	newOrder, err := u.service.CreateOrder(orderBody, userId, c.Request().Context())
 	if err != nil {
-		if err == utils.ErrInvalidId || err == utils.ErrQtyOrder || err == utils.ErrBadRequestBody {
+		if err == customerrors.ErrInvalidId || err == customerrors.ErrQtyOrder || err == customerrors.ErrBadRequestBody {
 			return c.JSON(http.StatusBadRequest, echo.Map{
 				"message": err.Error()})
 		}
@@ -118,13 +118,13 @@ func (u *orderController) TakeOrder(c echo.Context) error {
 	role := claims["role_id"].(float64)
 	if role != constants.Role_admin {
 		return c.JSON(http.StatusForbidden, echo.Map{
-			"message": utils.ErrPermission.Error(),
+			"message": customerrors.ErrPermission.Error(),
 		})
 	}
 	var takeOrder dto.TakeOrder
 	if err := c.Bind(&takeOrder); err != nil {
 		return c.JSON(http.StatusBadRequest, echo.Map{
-			"message": utils.ErrOrderCode.Error()})
+			"message": customerrors.ErrOrderCode.Error()})
 	}
 	if err := c.Validate(takeOrder); err != nil {
 		return err
@@ -132,7 +132,7 @@ func (u *orderController) TakeOrder(c echo.Context) error {
 	err := u.service.TakeOrder(takeOrder.Code, c.Request().Context())
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, echo.Map{
-			"message": utils.ErrOrderCode.Error()})
+			"message": customerrors.ErrOrderCode.Error()})
 	}
 	return c.JSON(http.StatusOK, echo.Map{
 		"message": "success take order",
@@ -144,7 +144,7 @@ func (u *orderController) OrderReady(c echo.Context) error {
 	role := claims["role_id"].(float64)
 	if role != constants.Role_admin {
 		return c.JSON(http.StatusForbidden, echo.Map{
-			"message": utils.ErrPermission.Error(),
+			"message": customerrors.ErrPermission.Error(),
 		})
 	}
 	orderId := c.Param("id")

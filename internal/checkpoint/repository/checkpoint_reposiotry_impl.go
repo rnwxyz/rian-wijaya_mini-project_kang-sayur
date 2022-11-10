@@ -69,11 +69,6 @@ func (r *checkpointRepositoryImpl) CreateCheckpoint(checkpoint *model.Checkpoint
 	return err
 }
 
-// DeleteCheckpoint implements CheckpointRepository
-func (r *checkpointRepositoryImpl) DeleteCheckpoint(checkpoint *model.Checkpoint, ctx context.Context) error {
-	panic("unimplemented")
-}
-
 // FindCheckpoints implements CheckpointRepository
 func (r *checkpointRepositoryImpl) FindCheckpoints(ctx context.Context) ([]model.Checkpoint, error) {
 	var checkpoints []model.Checkpoint
@@ -82,11 +77,6 @@ func (r *checkpointRepositoryImpl) FindCheckpoints(ctx context.Context) ([]model
 		return nil, err
 	}
 	return checkpoints, nil
-}
-
-// UpdateCheckpoint implements CheckpointRepository
-func (r *checkpointRepositoryImpl) UpdateCheckpoint(checkpoint *model.Checkpoint, ctx context.Context) error {
-	panic("unimplemented")
 }
 
 func NewCheckpointRepository(db *gorm.DB) CheckpointRepository {

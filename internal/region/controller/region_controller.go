@@ -5,7 +5,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/region/service"
-	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils"
+	customerrors "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils/custom_errors"
 )
 
 type regionController struct {
@@ -43,7 +43,7 @@ func (r *regionController) GetRegency(c echo.Context) error {
 	id := c.Param("province_id")
 	regencies, err := r.service.FindRegency(&id, c.Request().Context())
 	if err != nil {
-		if err == utils.ErrInvalidId {
+		if err == customerrors.ErrInvalidId {
 			return c.JSON(http.StatusBadRequest, echo.Map{
 				"message": err.Error(),
 			})
@@ -62,7 +62,7 @@ func (r *regionController) GetDistrict(c echo.Context) error {
 	id := c.Param("regency_id")
 	districts, err := r.service.FindDistrict(&id, c.Request().Context())
 	if err != nil {
-		if err == utils.ErrInvalidId {
+		if err == customerrors.ErrInvalidId {
 			return c.JSON(http.StatusBadRequest, echo.Map{
 				"message": err.Error(),
 			})
@@ -81,7 +81,7 @@ func (r *regionController) GetVillage(c echo.Context) error {
 	id := c.Param("district_id")
 	villages, err := r.service.FindVillage(&id, c.Request().Context())
 	if err != nil {
-		if err == utils.ErrInvalidId {
+		if err == customerrors.ErrInvalidId {
 			return c.JSON(http.StatusBadRequest, echo.Map{
 				"message": err.Error(),
 			})

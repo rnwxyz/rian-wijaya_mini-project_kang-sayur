@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/constants"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/model"
-	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils"
+	customerrors "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils/custom_errors"
 	"gorm.io/gorm"
 )
 
@@ -21,10 +21,10 @@ func (r *orderRepositoryImpl) CreateOrder(order *model.Order, ctx context.Contex
 	err := r.db.WithContext(ctx).Create(order).Error
 	if err != nil {
 		if strings.Contains(err.Error(), "Duplicate entry") {
-			return utils.ErrDuplicateData
+			return customerrors.ErrDuplicateData
 		}
 		if strings.Contains(err.Error(), "Cannot add or update a child row") {
-			return utils.ErrBadRequestBody
+			return customerrors.ErrBadRequestBody
 		}
 		return err
 	}
@@ -46,7 +46,7 @@ func (r *orderRepositoryImpl) FindOrderDetail(order *model.Order, ctx context.Co
 	err := r.db.WithContext(ctx).Where("user_id = ? AND id = ?", order.UserID, order.ID).Preload("OrderDetail.Item").Preload("OrderDetail").Preload("StatusOrder").Preload("Checkpoint").Find(&order).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return utils.ErrNotFound
+			return customerrors.ErrNotFound
 		}
 		return err
 	}
@@ -73,7 +73,7 @@ func (r *orderRepositoryImpl) CencelOrder(orderId uuid.UUID, ctx context.Context
 		return res.Error
 	}
 	if res.RowsAffected == 0 {
-		return utils.ErrNotFound
+		return customerrors.ErrNotFound
 	}
 	return nil
 }
@@ -88,7 +88,7 @@ func (r *orderRepositoryImpl) OrderReady(orderId uuid.UUID, ctx context.Context)
 		return res.Error
 	}
 	if res.RowsAffected == 0 {
-		return utils.ErrNotFound
+		return customerrors.ErrNotFound
 	}
 	return nil
 }
@@ -98,7 +98,7 @@ func (r *orderRepositoryImpl) OrderDone(orderId uuid.UUID, ctx context.Context) 
 	order := model.Order{
 		ID: orderId,
 	}
-  
+
 	res := r.db.WithContext(ctx).Model(&order).Updates(&model.Order{
 		StatusOrderID: constants.Success_status_order_id,
 		ExpiredOrder:  time.Now(),
@@ -107,7 +107,7 @@ func (r *orderRepositoryImpl) OrderDone(orderId uuid.UUID, ctx context.Context) 
 		return res.Error
 	}
 	if res.RowsAffected == 0 {
-		return utils.ErrNotFound
+		return customerrors.ErrNotFound
 	}
 	return nil
 }
@@ -122,7 +122,7 @@ func (r *orderRepositoryImpl) OrderWaiting(orderId uuid.UUID, ctx context.Contex
 		return res.Error
 	}
 	if res.RowsAffected == 0 {
-		return utils.ErrNotFound
+		return customerrors.ErrNotFound
 	}
 	return nil
 }

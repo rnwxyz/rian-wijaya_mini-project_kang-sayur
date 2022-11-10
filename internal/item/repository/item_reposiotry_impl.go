@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/model"
-	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils"
+	customerrors "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils/custom_errors"
 	"gorm.io/gorm"
 )
 
@@ -18,7 +18,7 @@ func (r *itemRepositoryImpl) CreateCategory(category *model.Category, ctx contex
 	err := r.db.WithContext(ctx).Create(category).Error
 	if err != nil {
 		if strings.Contains(err.Error(), "Duplicate entry") {
-			return utils.ErrDuplicateData
+			return customerrors.ErrDuplicateData
 		}
 		return err
 	}
@@ -30,10 +30,10 @@ func (r *itemRepositoryImpl) CreateItem(item *model.Item, ctx context.Context) e
 	err := r.db.WithContext(ctx).Create(item).Error
 	if err != nil {
 		if strings.Contains(err.Error(), "Duplicate entry") {
-			return utils.ErrDuplicateData
+			return customerrors.ErrDuplicateData
 		}
 		if strings.Contains(err.Error(), "Cannot add or update a child row") {
-			return utils.ErrBadRequestBody
+			return customerrors.ErrBadRequestBody
 		}
 		return err
 	}
@@ -55,7 +55,7 @@ func (r *itemRepositoryImpl) FindItemById(item *model.Item, ctx context.Context)
 	err := r.db.WithContext(ctx).First(item).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return utils.ErrNotFound
+			return customerrors.ErrNotFound
 		}
 		return err
 	}
@@ -94,15 +94,15 @@ func (r *itemRepositoryImpl) UpdateItem(item *model.Item, ctx context.Context) e
 
 	if res.Error != nil {
 		if strings.Contains(res.Error.Error(), "Duplicate entry") {
-			return utils.ErrDuplicateData
+			return customerrors.ErrDuplicateData
 		}
 		if strings.Contains(res.Error.Error(), "Cannot add or update a child row") {
-			return utils.ErrBadRequestBody
+			return customerrors.ErrBadRequestBody
 		}
 		return res.Error
 	}
 	if res.RowsAffected == 0 {
-		return utils.ErrInvalidId
+		return customerrors.ErrInvalidId
 	}
 	return nil
 }

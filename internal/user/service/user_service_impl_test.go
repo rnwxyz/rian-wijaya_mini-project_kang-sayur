@@ -10,16 +10,17 @@ import (
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/user/repository"
 	um "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/user/repository/mock"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/model"
-	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils"
-	utm "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils/mock"
+	customerrors "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils/custom_errors"
+	mm "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils/middleware/mock"
+	pm "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils/password/mock"
 	"github.com/stretchr/testify/suite"
 )
 
 type suiteUserService struct {
 	suite.Suite
 	userRepositoryMock *um.UserRepositoryMock
-	passwordMock       *utm.PasswordMock
-	JWTServiceMock     *utm.MockJWTService
+	passwordMock       *pm.PasswordMock
+	JWTServiceMock     *mm.MockJWTService
 	userService        UserService
 }
 
@@ -33,8 +34,8 @@ func newUserServiceMock(repository repository.UserRepository, password PasswordH
 
 func (s *suiteUserService) SetupTest() {
 	s.userRepositoryMock = new(um.UserRepositoryMock)
-	s.passwordMock = new(utm.PasswordMock)
-	s.JWTServiceMock = new(utm.MockJWTService)
+	s.passwordMock = new(pm.PasswordMock)
+	s.JWTServiceMock = new(mm.MockJWTService)
 	s.userService = newUserServiceMock(s.userRepositoryMock, s.passwordMock, s.JWTServiceMock)
 }
 
@@ -151,7 +152,7 @@ func (s *suiteUserService) TestLogin() {
 				Email:    "test@gmail.com",
 				Password: "1234",
 			},
-			ExpectedErr:      utils.ErrInvalidPassword,
+			ExpectedErr:      customerrors.ErrInvalidPassword,
 			ExpectedResult:   "",
 			FindByEmailRes:   &model.User{},
 			FindByEmailErr:   nil,
@@ -213,7 +214,7 @@ func (s *suiteUserService) TestFindUser() {
 		{
 			Name:            "error id",
 			Body:            "123",
-			ExpectedErr:     utils.ErrInvalidId,
+			ExpectedErr:     customerrors.ErrInvalidId,
 			ExpectedResult:  nil,
 			FindUserByIdRes: nil,
 			FindUserByIdErr: nil,
@@ -299,7 +300,7 @@ func (s *suiteUserService) TestUpdateUser() {
 				Name: "test",
 			},
 			Id:            "123",
-			ExpectedErr:   utils.ErrInvalidId,
+			ExpectedErr:   customerrors.ErrInvalidId,
 			UpdateUserErr: nil,
 		},
 		{
@@ -339,7 +340,7 @@ func (s *suiteUserService) TestDeleteUser() {
 		{
 			Name:          "invalid id",
 			Id:            "123",
-			ExpectedErr:   utils.ErrInvalidId,
+			ExpectedErr:   customerrors.ErrInvalidId,
 			DeleteUserErr: nil,
 		},
 		{

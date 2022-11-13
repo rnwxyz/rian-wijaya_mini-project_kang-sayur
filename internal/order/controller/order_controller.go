@@ -54,7 +54,8 @@ func (u *orderController) CreateOrder(c echo.Context) error {
 			"message": customerrors.ErrBadRequestBody.Error()})
 	}
 	if err := c.Validate(orderBody); err != nil {
-		return err
+		return c.JSON(http.StatusBadRequest, echo.Map{
+			"message": err.Error()})
 	}
 
 	newOrder, err := u.service.CreateOrder(orderBody, userId, c.Request().Context())
@@ -134,7 +135,8 @@ func (u *orderController) TakeOrder(c echo.Context) error {
 			"message": customerrors.ErrOrderCode.Error()})
 	}
 	if err := c.Validate(takeOrder); err != nil {
-		return err
+		return c.JSON(http.StatusBadRequest, echo.Map{
+			"message": err.Error()})
 	}
 	err := u.service.TakeOrder(takeOrder, c.Request().Context())
 	if err != nil {
@@ -173,7 +175,7 @@ func (u *orderController) GetQRCode(c echo.Context) error {
 	qr, err := u.qrCode.GenerateQRCode(hashCode)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, echo.Map{
-			"message": customerrors.ErrGenerateQR,
+			"message": customerrors.ErrGenerateQR.Error(),
 		})
 	}
 	return c.JSON(http.StatusOK, echo.Map{

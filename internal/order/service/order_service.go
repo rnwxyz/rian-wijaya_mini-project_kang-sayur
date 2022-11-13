@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 
+	"github.com/google/uuid"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/order/dto"
 )
 
@@ -14,4 +15,5 @@ type OrderService interface {
 	CencelOder(orderId string, ctx context.Context) error
 	OrderReady(orderId string, ctx context.Context) error
 	TakeOrder(body dto.TakeOrder, ctx context.Context) error
+	SetOrderStatus(orderId uuid.UUID, status string, ctx context.Context) error
 }

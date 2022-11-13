@@ -86,6 +86,6 @@ type TakeOrder struct {
 }
 
 type NewOrder struct {
-	OrderID     uuid.UUID
-	RedirectURL string `json:"redirect_url"`
+	OrderID     uuid.UUID `json:"order_id"`
+	RedirectURL string    `json:"redirect_url"`
 }

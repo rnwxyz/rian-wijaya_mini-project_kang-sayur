@@ -4,15 +4,16 @@ import (
 	"context"
 
 	or "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/order/repository"
+	os "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/order/service"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/transaction/dto"
 	tr "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/transaction/repository"
-	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/model"
 	customerrors "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils/custom_errors"
 )
 
 type transactionServiceImpl struct {
 	transactionRepo tr.TransactionRepository
 	orderRepo       or.OrderRepository
+	orderService    os.OrderService
 }
 
 // FindTransaction implements TransactionService
@@ -42,54 +43,14 @@ func (s *transactionServiceImpl) CreateTransaction(body dto.TransactionRequest, 
 	if err != nil {
 		return err
 	}
-	err = s.SetOrderStatus(body, ctx)
+	err = s.orderService.SetOrderStatus(makeTransaction.OrderID, makeTransaction.TransactionStatus, ctx)
 	return err
 }
 
-// SetOrderStatus implements TransactionService
-func (s *transactionServiceImpl) SetOrderStatus(body dto.TransactionRequest, ctx context.Context) error {
-	order := model.Order{
-		ID: body.ToModel().OrderID,
-	}
-	err := s.orderRepo.FindOrderDetail(&order, ctx)
-	if err != nil {
-		return err
-	}
-	switch body.TransactionStatus {
-	case "capture":
-		err := s.orderRepo.OrderWaiting(body.ToModel().OrderID, ctx)
-		if err != nil {
-			return err
-		}
-	case "settlement":
-		err := s.orderRepo.OrderWaiting(body.ToModel().OrderID, ctx)
-		if err != nil {
-			return err
-		}
-	case "deny":
-		err := s.orderRepo.CencelOrder(body.ToModel().OrderID, ctx)
-		if err != nil {
-			return err
-		}
-	case "cencel":
-		err := s.orderRepo.CencelOrder(body.ToModel().OrderID, ctx)
-		if err != nil {
-			return err
-		}
-	case "expired":
-		err := s.orderRepo.CencelOrder(body.ToModel().OrderID, ctx)
-		if err != nil {
-			return err
-		}
-	default:
-		return nil
-	}
-	return nil
-}
-
-func NewTransactionService(transaction tr.TransactionRepository, order or.OrderRepository) TransactionService {
+func NewTransactionService(transaction tr.TransactionRepository, orderRepository or.OrderRepository, orderService os.OrderService) TransactionService {
 	return &transactionServiceImpl{
 		transactionRepo: transaction,
-		orderRepo:       order,
+		orderRepo:       orderRepository,
+		orderService:    orderService,
 	}
 }

@@ -47,7 +47,8 @@ func (u *checkpointController) CreateCheckpoint(c echo.Context) error {
 			"message": customerrors.ErrBadRequestBody.Error()})
 	}
 	if err := c.Validate(checkpointBody); err != nil {
-		return err
+		return c.JSON(http.StatusBadRequest, echo.Map{
+			"message": err.Error()})
 	}
 	id, err := u.service.CreateCheckpoint(checkpointBody, c.Request().Context())
 	if err != nil {

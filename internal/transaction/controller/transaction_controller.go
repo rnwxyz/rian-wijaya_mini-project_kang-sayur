@@ -7,6 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/transaction/dto"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/transaction/service"
+	customerrors "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils/custom_errors"
 )
 
 type JWTService interface {
@@ -38,7 +39,7 @@ func (u *transactionController) TransactionNotification(c echo.Context) error {
 
 	if err := c.Bind(&transactionBody); err != nil {
 		return c.JSON(http.StatusBadRequest, echo.Map{
-			"message": err.Error()})
+			"message": customerrors.ErrBadRequestBody.Error()})
 	}
 
 	err := u.service.CreateTransaction(transactionBody, c.Request().Context())

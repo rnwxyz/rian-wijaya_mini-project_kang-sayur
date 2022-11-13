@@ -52,7 +52,8 @@ func (u *itemController) CreateItem(c echo.Context) error {
 			"message": customerrors.ErrBadRequestBody.Error()})
 	}
 	if err := c.Validate(itemBody); err != nil {
-		return err
+		return c.JSON(http.StatusBadRequest, echo.Map{
+			"message": err.Error()})
 	}
 	id, err := u.service.CreateItem(itemBody, c.Request().Context())
 	if err != nil {
@@ -84,7 +85,8 @@ func (u *itemController) CreateCategory(c echo.Context) error {
 			"message": customerrors.ErrBadRequestBody.Error()})
 	}
 	if err := c.Validate(categoryBody); err != nil {
-		return err
+		return c.JSON(http.StatusBadRequest, echo.Map{
+			"message": err.Error()})
 	}
 	id, err := u.service.CreateCategory(categoryBody, c.Request().Context())
 	if err != nil {

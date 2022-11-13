@@ -20,6 +20,7 @@ import (
 type midtrans interface {
 	NewTransaction(order model.Order, user model.User) (string, error)
 }
+
 type orderServiceImpl struct {
 	orderRepo or.OrderRepository
 	itemRepo  it.ItemRepository
@@ -229,4 +230,45 @@ func (s *orderServiceImpl) CencelOder(orderId string, ctx context.Context) error
 	}
 	err = s.orderRepo.CencelOrder(id, ctx)
 	return err
+}
+
+// SetOrderStatus implements OrderService
+func (s *orderServiceImpl) SetOrderStatus(orderId uuid.UUID, status string, ctx context.Context) error {
+	order := model.Order{
+		ID: orderId,
+	}
+	err := s.orderRepo.FindOrderDetail(&order, ctx)
+	if err != nil {
+		return err
+	}
+	switch status {
+	case "capture":
+		err := s.orderRepo.OrderWaiting(orderId, ctx)
+		if err != nil {
+			return err
+		}
+	case "settlement":
+		err := s.orderRepo.OrderWaiting(orderId, ctx)
+		if err != nil {
+			return err
+		}
+	case "deny":
+		err := s.orderRepo.CencelOrder(orderId, ctx)
+		if err != nil {
+			return err
+		}
+	case "cencel":
+		err := s.orderRepo.CencelOrder(orderId, ctx)
+		if err != nil {
+			return err
+		}
+	case "expired":
+		err := s.orderRepo.CencelOrder(orderId, ctx)
+		if err != nil {
+			return err
+		}
+	default:
+		return nil
+	}
+	return nil
 }

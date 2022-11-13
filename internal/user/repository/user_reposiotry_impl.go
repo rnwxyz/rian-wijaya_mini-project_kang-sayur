@@ -6,7 +6,7 @@ import (
 
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/constants"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/model"
-	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils"
+	customerrors "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils/custom_errors"
 	"gorm.io/gorm"
 )
 
@@ -19,7 +19,7 @@ func (u *userRepositoryImpl) CreateUser(user *model.User, ctx context.Context) e
 	err := u.db.WithContext(ctx).Create(user).Error
 	if err != nil {
 		if strings.Contains(err.Error(), "Duplicate entry") {
-			return utils.ErrEmailAlredyExist
+			return customerrors.ErrEmailAlredyExist
 		}
 		return err
 	}
@@ -32,7 +32,7 @@ func (u *userRepositoryImpl) FindUserByEmail(email string, ctx context.Context) 
 	err := u.db.WithContext(ctx).Select([]string{"id", "email", "password", "role_id"}).Where("email = ?", email).First(&user).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return nil, utils.ErrNotFound
+			return nil, customerrors.ErrNotFound
 		}
 		return nil, err
 	}
@@ -45,7 +45,7 @@ func (u *userRepositoryImpl) FindUserByID(id string, ctx context.Context) (*mode
 	err := u.db.WithContext(ctx).Preload("Province").Preload("Regency").Preload("District").Preload("Village").Where("id = ?", id).First(&user).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return nil, utils.ErrNotFound
+			return nil, customerrors.ErrNotFound
 		}
 		return nil, err
 	}
@@ -55,7 +55,7 @@ func (u *userRepositoryImpl) FindUserByID(id string, ctx context.Context) (*mode
 // FindAllUsers implements UserRepository
 func (u *userRepositoryImpl) FindAllUsers(ctx context.Context) ([]model.User, error) {
 	var users []model.User
-	err := u.db.WithContext(ctx).Where("role_id = ?", constants.Role_user).Preload("Province").Preload("Regency").Preload("District").Preload("Village").Find(&users).Error
+	err := u.db.WithContext(ctx).Preload("Province").Preload("Regency").Preload("District").Preload("Village").Find(&users).Error
 	return users, err
 }
 
@@ -74,7 +74,7 @@ func (u *userRepositoryImpl) UpdateUser(user *model.User, ctx context.Context) e
 		return res.Error
 	}
 	if res.RowsAffected == 0 {
-		return utils.ErrNotFound
+		return customerrors.ErrNotFound
 	}
 	return nil
 }
@@ -86,7 +86,7 @@ func (u *userRepositoryImpl) DeleteUser(user *model.User, ctx context.Context) e
 		return res.Error
 	}
 	if res.RowsAffected == 0 {
-		return utils.ErrNotFound
+		return customerrors.ErrNotFound
 	}
 	return nil
 }

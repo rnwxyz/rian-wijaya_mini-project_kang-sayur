@@ -7,7 +7,8 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/checkpoint/dto"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/checkpoint/service"
-	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils"
+	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/constants"
+	customerrors "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils/custom_errors"
 )
 
 type JWTService interface {
@@ -26,30 +27,32 @@ func NewCheckpointController(service service.CheckpointService, jwt JWTService) 
 }
 
 func (u *checkpointController) InitRoute(auth *echo.Group) {
-	auth.POST("/checkpoint", u.CreateCheckpoint)
-	auth.GET("/checkpoint", u.GetCheckpointByUser)
-	auth.GET("/checkpoint/all", u.GetCheckpoints)
+	checkpoints := auth.Group("/checkpoints")
+	checkpoints.POST("", u.CreateCheckpoint)
+	checkpoints.GET("", u.GetCheckpoints)
+	checkpoints.GET("/profile", u.GetCheckpointByUser)
 }
 
 func (u *checkpointController) CreateCheckpoint(c echo.Context) error {
 	claims := u.jwtService.GetClaims(&c)
 	role := claims["role_id"].(float64)
-	if role < 3 {
+	if role != constants.Role_admin {
 		return c.JSON(http.StatusForbidden, echo.Map{
-			"message": utils.ErrPermission.Error(),
+			"message": customerrors.ErrPermission.Error(),
 		})
 	}
 	var checkpointBody dto.CheckpointRequest
 	if err := c.Bind(&checkpointBody); err != nil {
 		return c.JSON(http.StatusBadRequest, echo.Map{
-			"message": utils.ErrBadRequestBody.Error()})
+			"message": customerrors.ErrBadRequestBody.Error()})
 	}
 	if err := c.Validate(checkpointBody); err != nil {
-		return err
+		return c.JSON(http.StatusBadRequest, echo.Map{
+			"message": err.Error()})
 	}
 	id, err := u.service.CreateCheckpoint(checkpointBody, c.Request().Context())
 	if err != nil {
-		if err == utils.ErrBadRequestBody {
+		if err == customerrors.ErrBadRequestBody {
 			return c.JSON(http.StatusBadRequest, echo.Map{
 				"message": err.Error()})
 		}
@@ -81,7 +84,7 @@ func (u *checkpointController) GetCheckpointByUser(c echo.Context) error {
 	userId := claims["user_id"].(string)
 	checkpoints, err := u.service.FindCheckpointsByUser(userId, c.Request().Context())
 	if err != nil {
-		if err == utils.ErrCheckpointNotCovered {
+		if err == customerrors.ErrCheckpointNotCovered {
 			return c.JSON(http.StatusNotFound, echo.Map{
 				"message": err.Error(),
 			})

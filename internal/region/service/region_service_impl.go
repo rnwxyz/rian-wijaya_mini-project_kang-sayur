@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/region/dto"
@@ -10,7 +9,7 @@ import (
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/constants"
 	importcsv "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/import_csv"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/model"
-	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils"
+	customerrors "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils/custom_errors"
 )
 
 type regionServiceImpl struct {
@@ -33,7 +32,7 @@ func (r *regionServiceImpl) FindRegency(id *string, ctx context.Context) (dto.Re
 	if id != nil {
 		idInt, err := strconv.Atoi(*id)
 		if err != nil {
-			return nil, utils.ErrInvalidId
+			return nil, customerrors.ErrInvalidId
 		}
 		regency.ProvinceID = uint(idInt)
 	}
@@ -52,7 +51,7 @@ func (r *regionServiceImpl) FindDistrict(id *string, ctx context.Context) (dto.D
 	if id != nil {
 		idInt, err := strconv.Atoi(*id)
 		if err != nil {
-			return nil, utils.ErrInvalidId
+			return nil, customerrors.ErrInvalidId
 		}
 		district.RegencyID = uint(idInt)
 	}
@@ -71,7 +70,7 @@ func (r *regionServiceImpl) FindVillage(id *string, ctx context.Context) (dto.Vi
 	if id != nil {
 		idInt, err := strconv.Atoi(*id)
 		if err != nil {
-			return nil, utils.ErrInvalidId
+			return nil, customerrors.ErrInvalidId
 		}
 		village.DistrictID = uint(idInt)
 	}
@@ -84,8 +83,8 @@ func (r *regionServiceImpl) FindVillage(id *string, ctx context.Context) (dto.Vi
 	return villages, nil
 }
 
-// importProvince implements RegionService
-func (r *regionServiceImpl) importProvince() error {
+// ImportProvince implements RegionService
+func (r *regionServiceImpl) ImportProvince() error {
 	isImported, err := r.repo.CheckIsImported(&model.Province{})
 	if err != nil {
 		return err
@@ -105,8 +104,8 @@ func (r *regionServiceImpl) importProvince() error {
 	return nil
 }
 
-// importDistrict implements RegionService
-func (r *regionServiceImpl) importDistrict() error {
+// ImportDistrict implements RegionService
+func (r *regionServiceImpl) ImportDistrict() error {
 	isImported, err := r.repo.CheckIsImported(&model.District{})
 	if err != nil {
 		return err
@@ -126,8 +125,8 @@ func (r *regionServiceImpl) importDistrict() error {
 	return nil
 }
 
-// importRegency implements RegionService
-func (r *regionServiceImpl) importRegency() error {
+// ImportRegency implements RegionService
+func (r *regionServiceImpl) ImportRegency() error {
 	isImported, err := r.repo.CheckIsImported(&model.Regency{})
 	if err != nil {
 		return err
@@ -147,8 +146,8 @@ func (r *regionServiceImpl) importRegency() error {
 	return nil
 }
 
-// importVillage implements RegionService
-func (r *regionServiceImpl) importVillage() error {
+// ImportVillage implements RegionService
+func (r *regionServiceImpl) ImportVillage() error {
 	isImported, err := r.repo.CheckIsImported(&model.Village{})
 	if err != nil {
 		return err
@@ -167,7 +166,6 @@ func (r *regionServiceImpl) importVillage() error {
 	for {
 		begin := placeholders
 		placeholders += limit
-		fmt.Println(placeholders)
 		if placeholders > len(villages) {
 			data := append(villages[0:0], villages[begin:]...)
 			err = r.repo.ImportRegion(data)
@@ -190,16 +188,16 @@ func NewRegionService(repository repository.RegionRepository, importCsv importcs
 		importCsv: importCsv,
 	}
 
-	if err := NewRegionService.importProvince(); err != nil {
+	if err := NewRegionService.ImportProvince(); err != nil {
 		panic(err)
 	}
-	if err := NewRegionService.importRegency(); err != nil {
+	if err := NewRegionService.ImportRegency(); err != nil {
 		panic(err)
 	}
-	if err := NewRegionService.importDistrict(); err != nil {
+	if err := NewRegionService.ImportDistrict(); err != nil {
 		panic(err)
 	}
-	if err := NewRegionService.importVillage(); err != nil {
+	if err := NewRegionService.ImportVillage(); err != nil {
 		panic(err)
 	}
 

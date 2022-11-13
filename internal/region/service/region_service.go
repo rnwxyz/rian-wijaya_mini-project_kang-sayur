@@ -8,10 +8,10 @@ import (
 )
 
 type RegionService interface {
-	importProvince() error
-	importRegency() error
-	importDistrict() error
-	importVillage() error
+	ImportProvince() error
+	ImportRegency() error
+	ImportDistrict() error
+	ImportVillage() error
 	FindProvince(ctx context.Context) ([]model.Province, error)
 	FindRegency(id *string, ctx context.Context) (dto.RegenciesResponse, error)
 	FindDistrict(id *string, ctx context.Context) (dto.DistrictsResponse, error)

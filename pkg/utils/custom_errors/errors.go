@@ -1,4 +1,4 @@
-package utils
+package customerrors
 
 import "errors"
 
@@ -17,4 +17,8 @@ var (
 	ErrQtyOrder                     = errors.New("order qty exceeds stock or less that 1")
 	ErrOrderCode                    = errors.New("invalid order code")
 	ErrCheckpointNotCovered         = errors.New("not found checkpoint in your location")
+	ErrUpdateStatusOrder            = errors.New("cant update status order")
+	ErrGenerateQR                   = errors.New("error when generate qrcode")
+	ErrCodeUsed                     = errors.New("code is used")
+	ErrWrongCheckpoint              = errors.New("cant pick up this order at this checkpoint")
 )

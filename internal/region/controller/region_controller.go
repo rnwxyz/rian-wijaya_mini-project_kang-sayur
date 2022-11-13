@@ -5,7 +5,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/region/service"
-	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils"
+	customerrors "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils/custom_errors"
 )
 
 type regionController struct {
@@ -19,10 +19,11 @@ func NewRegionController(regionService service.RegionService) *regionController 
 }
 
 func (r *regionController) InitRoute(auth *echo.Group) {
-	auth.GET("/region/province", r.GetProvince)
-	auth.GET("/region/regency/:province_id", r.GetRegency)
-	auth.GET("/region/district/:regency_id", r.GetDistrict)
-	auth.GET("/region/village/:district_id", r.GetVillage)
+	regions := auth.Group("/regions")
+	regions.GET("/provinces", r.GetProvince)
+	regions.GET("/regencies/:province_id", r.GetRegency)
+	regions.GET("/districts/:regency_id", r.GetDistrict)
+	regions.GET("/villages/:district_id", r.GetVillage)
 }
 
 func (r *regionController) GetProvince(c echo.Context) error {
@@ -42,7 +43,7 @@ func (r *regionController) GetRegency(c echo.Context) error {
 	id := c.Param("province_id")
 	regencies, err := r.service.FindRegency(&id, c.Request().Context())
 	if err != nil {
-		if err == utils.ErrInvalidId {
+		if err == customerrors.ErrInvalidId {
 			return c.JSON(http.StatusBadRequest, echo.Map{
 				"message": err.Error(),
 			})
@@ -61,7 +62,7 @@ func (r *regionController) GetDistrict(c echo.Context) error {
 	id := c.Param("regency_id")
 	districts, err := r.service.FindDistrict(&id, c.Request().Context())
 	if err != nil {
-		if err == utils.ErrInvalidId {
+		if err == customerrors.ErrInvalidId {
 			return c.JSON(http.StatusBadRequest, echo.Map{
 				"message": err.Error(),
 			})
@@ -80,7 +81,7 @@ func (r *regionController) GetVillage(c echo.Context) error {
 	id := c.Param("district_id")
 	villages, err := r.service.FindVillage(&id, c.Request().Context())
 	if err != nil {
-		if err == utils.ErrInvalidId {
+		if err == customerrors.ErrInvalidId {
 			return c.JSON(http.StatusBadRequest, echo.Map{
 				"message": err.Error(),
 			})

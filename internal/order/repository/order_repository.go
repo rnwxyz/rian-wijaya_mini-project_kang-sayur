@@ -13,6 +13,7 @@ type OrderRepository interface {
 	FindOrder(userId uuid.UUID, ctx context.Context) ([]model.Order, error)
 	FindOrderDetail(order *model.Order, ctx context.Context) error
 	CencelOrder(orderId uuid.UUID, ctx context.Context) error
+	FindOrderById(order *model.Order, ctx context.Context) error
 	OrderReady(orderId uuid.UUID, ctx context.Context) error
 	OrderDone(orderId uuid.UUID, ctx context.Context) error
 	OrderWaiting(orderId uuid.UUID, ctx context.Context) error

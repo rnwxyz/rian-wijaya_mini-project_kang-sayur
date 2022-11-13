@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/model"
-	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils"
+	customerrors "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils/custom_errors"
 	"gorm.io/gorm"
 )
 
@@ -18,7 +18,7 @@ func (r *transactionRepositoryImpl) CreateTransaction(transaction *model.Transac
 	err := r.db.WithContext(ctx).Create(transaction).Error
 	if err != nil {
 		if strings.Contains(err.Error(), "Cannot add or update a child row") {
-			return utils.ErrBadRequestBody
+			return customerrors.ErrBadRequestBody
 		}
 		return err
 	}
@@ -32,7 +32,7 @@ func (r *transactionRepositoryImpl) UpdateTransaction(transaction *model.Transac
 	}).Error
 	if err != nil {
 		if strings.Contains(err.Error(), "Cannot add or update a child row") {
-			return utils.ErrBadRequestBody
+			return customerrors.ErrBadRequestBody
 		}
 		return err
 	}
@@ -54,7 +54,7 @@ func (r *transactionRepositoryImpl) FindTransaction(transaction *model.Transacti
 	err := r.db.WithContext(ctx).First(transaction).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return utils.ErrNotFound
+			return customerrors.ErrNotFound
 		}
 		return err
 	}

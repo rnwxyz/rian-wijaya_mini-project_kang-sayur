@@ -6,7 +6,7 @@ import (
 
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/item/dto"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/item/repository"
-	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils"
+	customerrors "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils/custom_errors"
 )
 
 type itemServiceImpl struct {
@@ -33,16 +33,6 @@ func (s *itemServiceImpl) CreateItem(body dto.ItemRequest, ctx context.Context) 
 	return item.ID, err
 }
 
-// DeleteCategory implements ItemService
-func (s *itemServiceImpl) DeleteCategory(id string, ctx context.Context) error {
-	panic("unimplemented")
-}
-
-// DeleteItem implements ItemService
-func (s *itemServiceImpl) DeleteItem(id string, ctx context.Context) error {
-	panic("unimplemented")
-}
-
 // FindCategories implements ItemService
 func (s *itemServiceImpl) FindCategories(ctx context.Context) (dto.CategoriesResponse, error) {
 	categories, err := s.repo.FindCategories(ctx)
@@ -54,16 +44,11 @@ func (s *itemServiceImpl) FindCategories(ctx context.Context) (dto.CategoriesRes
 	return categoriesResponse, nil
 }
 
-// FindItem implements ItemService
-func (s *itemServiceImpl) FindItem(id string, ctx context.Context) (*dto.ItemResponse, error) {
-	panic("unimplemented")
-}
-
 // FindItemByCategory implements ItemService
 func (s *itemServiceImpl) FindItemsByCategory(categoryId string, ctx context.Context) (dto.ItemsResponse, error) {
 	id, err := strconv.Atoi(categoryId)
 	if err != nil {
-		return nil, utils.ErrInvalidId
+		return nil, customerrors.ErrInvalidId
 	}
 	items, err := s.repo.FindItemsByCategory(uint(id), ctx)
 	if err != nil {
@@ -85,16 +70,11 @@ func (s *itemServiceImpl) FindItems(ctx context.Context) (dto.ItemsResponse, err
 	return itemsResponse, nil
 }
 
-// UpdateCategory implements ItemService
-func (s *itemServiceImpl) UpdateCategory(id string, body dto.CategoryRequest, ctx context.Context) error {
-	panic("unimplemented")
-}
-
 // UpdateItem implements ItemService
 func (s *itemServiceImpl) UpdateItem(id string, body dto.ItemRequest, ctx context.Context) error {
 	itemId, err := strconv.Atoi(id)
 	if err != nil {
-		return utils.ErrInvalidId
+		return customerrors.ErrInvalidId
 	}
 	item := body.ToModel()
 	item.ID = uint(itemId)

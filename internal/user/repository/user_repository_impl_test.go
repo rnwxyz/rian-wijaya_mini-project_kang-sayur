@@ -9,7 +9,7 @@ import (
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/google/uuid"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/model"
-	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils"
+	customerrors "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils/custom_errors"
 	"github.com/stretchr/testify/suite"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -69,7 +69,7 @@ func (s *suiteUserRepository) TestCreateUser() {
 				Email:    "test@gmail.com",
 				Password: "test",
 			},
-			ExpectedErr: utils.ErrEmailAlredyExist,
+			ExpectedErr: customerrors.ErrEmailAlredyExist,
 			MockReturn:  errors.New("Duplicate entry"),
 		},
 	}
@@ -113,7 +113,7 @@ func (s *suiteUserRepository) TestFindUserByEmail() {
 		{
 			Name:           "not found",
 			Email:          "test@gmail.com",
-			ExpectedErr:    utils.ErrNotFound,
+			ExpectedErr:    customerrors.ErrNotFound,
 			MockReturn:     gorm.ErrRecordNotFound,
 			ExpeckedResult: nil,
 		},
@@ -157,7 +157,7 @@ func (s *suiteUserRepository) TestFindUserById() {
 		{
 			Name:        "not found",
 			ID:          "123",
-			ExpectedErr: utils.ErrNotFound,
+			ExpectedErr: customerrors.ErrNotFound,
 			MockReturn:  gorm.ErrRecordNotFound,
 		},
 		{
@@ -213,7 +213,7 @@ func (s *suiteUserRepository) TestFindAllUser() {
 	row := sqlmock.NewRows([]string{"email"}).AddRow("test@gmail.com")
 	for _, v := range testCase {
 		s.T().Run(v.Name, func(t *testing.T) {
-			db := s.mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `users` WHERE role_id = ? AND `users`.`deleted_at` IS NULL"))
+			db := s.mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `users` WHERE `users`.`deleted_at` IS NULL"))
 			if v.ExpectedErr != nil {
 				db.WillReturnError(v.MockReturn)
 			} else {
@@ -253,7 +253,7 @@ func (s *suiteUserRepository) TestUpdateUser() {
 				Email: "test@gmail.com",
 			},
 			RowAffected: 0,
-			ExpectedErr: utils.ErrNotFound,
+			ExpectedErr: customerrors.ErrNotFound,
 			MockErr:     nil,
 		},
 		{
@@ -306,7 +306,7 @@ func (s *suiteUserRepository) TestDeleteUser() {
 		},
 		{
 			Name:        "user not found",
-			ExpectedErr: utils.ErrNotFound,
+			ExpectedErr: customerrors.ErrNotFound,
 			RowAffected: 0,
 			MockErr:     nil,
 			Body: &model.User{

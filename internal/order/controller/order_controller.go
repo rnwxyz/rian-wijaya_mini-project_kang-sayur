@@ -7,32 +7,41 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/order/dto"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/order/service"
-	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils"
+	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/constants"
+	customerrors "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils/custom_errors"
 )
 
 type JWTService interface {
 	GetClaims(c *echo.Context) jwt.MapClaims
 }
 
+type QRCode interface {
+	GenerateQRCode(hashCode string) ([]byte, error)
+}
+
 type orderController struct {
 	service    service.OrderService
 	jwtService JWTService
+	qrCode     QRCode
 }
 
-func NewOrderController(service service.OrderService, jwt JWTService) *orderController {
+func NewOrderController(service service.OrderService, jwt JWTService, qr QRCode) *orderController {
 	return &orderController{
 		service:    service,
 		jwtService: jwt,
+		qrCode:     qr,
 	}
 }
 
 func (u *orderController) InitRoute(auth *echo.Group) {
-	auth.POST("/order", u.CreateOrder)
-	auth.POST("/order/takeorder", u.TakeOrder)
-	auth.GET("/order", u.GetOrder)
-	auth.GET("/order/:id", u.GetOrderDetail)
-	auth.PUT("/order/:id/cencel", u.CencelOrder)
-	auth.PUT("/order/:id/ready", u.OrderReady)
+	orders := auth.Group("/orders")
+	orders.POST("", u.CreateOrder)
+	orders.GET("", u.GetOrder)
+	orders.GET("/:id", u.GetOrderDetail)
+	orders.GET("/qr/:hash_code", u.GetQRCode)
+	orders.POST("/takeorder", u.TakeOrder)
+	orders.PUT("/cencel/:id", u.CencelOrder)
+	orders.PUT("/ready/:id", u.OrderReady)
 }
 
 func (u *orderController) CreateOrder(c echo.Context) error {
@@ -42,15 +51,16 @@ func (u *orderController) CreateOrder(c echo.Context) error {
 	var orderBody dto.OrderRequest
 	if err := c.Bind(&orderBody); err != nil {
 		return c.JSON(http.StatusBadRequest, echo.Map{
-			"message": utils.ErrBadRequestBody.Error()})
+			"message": customerrors.ErrBadRequestBody.Error()})
 	}
 	if err := c.Validate(orderBody); err != nil {
-		return err
+		return c.JSON(http.StatusBadRequest, echo.Map{
+			"message": err.Error()})
 	}
 
 	newOrder, err := u.service.CreateOrder(orderBody, userId, c.Request().Context())
 	if err != nil {
-		if err == utils.ErrInvalidId || err == utils.ErrQtyOrder || err == utils.ErrBadRequestBody {
+		if err == customerrors.ErrInvalidId || err == customerrors.ErrQtyOrder || err == customerrors.ErrBadRequestBody {
 			return c.JSON(http.StatusBadRequest, echo.Map{
 				"message": err.Error()})
 		}
@@ -114,23 +124,25 @@ func (u *orderController) CencelOrder(c echo.Context) error {
 func (u *orderController) TakeOrder(c echo.Context) error {
 	claims := u.jwtService.GetClaims(&c)
 	role := claims["role_id"].(float64)
-	if role < 3 {
+	if role != constants.Role_admin {
 		return c.JSON(http.StatusForbidden, echo.Map{
-			"message": utils.ErrPermission.Error(),
+			"message": customerrors.ErrPermission.Error(),
 		})
 	}
 	var takeOrder dto.TakeOrder
 	if err := c.Bind(&takeOrder); err != nil {
 		return c.JSON(http.StatusBadRequest, echo.Map{
-			"message": utils.ErrOrderCode.Error()})
+			"message": customerrors.ErrOrderCode.Error()})
 	}
 	if err := c.Validate(takeOrder); err != nil {
-		return err
+		return c.JSON(http.StatusBadRequest, echo.Map{
+			"message": err.Error()})
 	}
-	err := u.service.TakeOrder(takeOrder.Code, c.Request().Context())
+	err := u.service.TakeOrder(takeOrder, c.Request().Context())
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, echo.Map{
-			"message": utils.ErrOrderCode.Error()})
+			"message": err.Error(),
+		})
 	}
 	return c.JSON(http.StatusOK, echo.Map{
 		"message": "success take order",
@@ -140,9 +152,9 @@ func (u *orderController) TakeOrder(c echo.Context) error {
 func (u *orderController) OrderReady(c echo.Context) error {
 	claims := u.jwtService.GetClaims(&c)
 	role := claims["role_id"].(float64)
-	if role < 3 {
+	if role != constants.Role_admin {
 		return c.JSON(http.StatusForbidden, echo.Map{
-			"message": utils.ErrPermission.Error(),
+			"message": customerrors.ErrPermission.Error(),
 		})
 	}
 	orderId := c.Param("id")
@@ -155,5 +167,21 @@ func (u *orderController) OrderReady(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, echo.Map{
 		"message": "order ready in checkpoint",
+	})
+}
+
+func (u *orderController) GetQRCode(c echo.Context) error {
+	hashCode := c.Param("hash_code")
+	qr, err := u.qrCode.GenerateQRCode(hashCode)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{
+			"message": customerrors.ErrGenerateQR.Error(),
+		})
+	}
+	return c.JSON(http.StatusOK, echo.Map{
+		"message": "get qrcode success",
+		"data": map[string][]byte{
+			"base64": qr,
+		},
 	})
 }

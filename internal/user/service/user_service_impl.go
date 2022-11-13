@@ -8,7 +8,7 @@ import (
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/internal/user/repository"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/constants"
 	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/model"
-	"github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils"
+	customerrors "github.com/rnwxyz/rian-wijaya_mini-project_kang-sayur/pkg/utils/custom_errors"
 )
 
 type PasswordHashFunction interface {
@@ -32,7 +32,7 @@ func (u *userServiceImpl) Login(user dto.LoginRequest, ctx context.Context) (str
 		return "", err
 	}
 	if !u.password.CheckPasswordHash(user.Password, userModel.Password) {
-		return "", utils.ErrInvalidPassword
+		return "", customerrors.ErrInvalidPassword
 	}
 	token, err := u.jwtService.GenerateToken(userModel)
 	if err != nil {
@@ -60,7 +60,7 @@ func (u *userServiceImpl) CreateDefaultAdmin() error {
 		Name:     "admin",
 		Email:    constants.Default_email_admin,
 		Password: hashPassword,
-		RoleID:   3,
+		RoleID:   constants.Role_admin,
 	}
 	err = u.repo.CreateUser(&admin, ctx)
 	return err
@@ -76,7 +76,7 @@ func (u *userServiceImpl) CreateUser(user dto.UserSignup, ctx context.Context) (
 	userModel := user.ToModel()
 	userModel.ID = newID
 	userModel.Password = hashPassword
-	userModel.RoleID = 1
+	userModel.RoleID = constants.Role_user
 	err = u.repo.CreateUser(userModel, ctx)
 	if err != nil {
 		return uuid.Nil, err
@@ -99,7 +99,7 @@ func (u *userServiceImpl) FindAllUsers(ctx context.Context) (dto.UsersResponse, 
 func (u *userServiceImpl) FindUser(id string, ctx context.Context) (*dto.UserResponse, error) {
 	_, err := uuid.Parse(id)
 	if err != nil {
-		return nil, utils.ErrInvalidId
+		return nil, customerrors.ErrInvalidId
 	}
 	user, err := u.repo.FindUserByID(id, ctx)
 	if err != nil {
@@ -114,7 +114,7 @@ func (u *userServiceImpl) FindUser(id string, ctx context.Context) (*dto.UserRes
 func (u *userServiceImpl) UpdateUser(id string, user dto.UserUpdate, ctx context.Context) error {
 	idUUID, err := uuid.Parse(id)
 	if err != nil {
-		return utils.ErrInvalidId
+		return customerrors.ErrInvalidId
 	}
 	userModel := user.ToModel()
 	userModel.ID = idUUID
@@ -126,7 +126,7 @@ func (u *userServiceImpl) UpdateUser(id string, user dto.UserUpdate, ctx context
 func (u *userServiceImpl) DeleteUser(id string, ctx context.Context) error {
 	idUUID, err := uuid.Parse(id)
 	if err != nil {
-		return utils.ErrInvalidId
+		return customerrors.ErrInvalidId
 	}
 	user := model.User{
 		ID: idUUID,
